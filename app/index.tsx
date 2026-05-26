@@ -10,10 +10,10 @@ export default function App() {
         <Button title="Controle de Estoque" onPress={() => router.push("/stock")} />
       </View>
       <View style={styles.buttonContainer}>
-        <Button title="Cestas básicas" onPress={() => alert("Botão 2")} />
+        <Button title="Cestas básicas" onPress={() => router.push("/cesta")} />
       </View>
       <View style={styles.buttonContainer}>
-        <Button title="Familias e pessoas" onPress={() => alert("Botão 3")} />
+        <Button title="Familias e pessoas" onPress={() => router.push("/families")} />
       </View>
     </View>
   );
