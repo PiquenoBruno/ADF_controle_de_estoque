@@ -1,10 +1,13 @@
+import { useRouter } from 'expo-router';
 import { Button, Dimensions, StyleSheet, View } from "react-native";
 
 export default function App() {
+  const router = useRouter();
+
   return (
     <View style={styles.container}>
       <View style={styles.buttonContainer}>
-        <Button title="Controle de Estoque" onPress={() => alert("Botão 1")} />
+        <Button title="Controle de Estoque" onPress={() => router.push("/stock")} />
       </View>
       <View style={styles.buttonContainer}>
         <Button title="Cestas básicas" onPress={() => alert("Botão 2")} />

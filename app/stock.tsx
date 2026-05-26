@@ -1,4 +1,5 @@
 import { supabase } from "@/src/services/supabase";
+import { Picker } from "@react-native-picker/picker";
 import { useEffect, useState } from "react";
 import {
     Alert,
@@ -18,12 +19,44 @@ type Product = {
   minimo: number;
 };
 
+// DADOS TEMPORÁRIOS (MOCK)
+const mockProducts: Product[] = [
+  {
+    id: "1",
+    nome: "Arroz",
+    quantidade: 20,
+    unidade: "kg",
+    minimo: 5,
+  },
+  {
+    id: "2",
+    nome: "Feijão",
+    quantidade: 10,
+    unidade: "kg",
+    minimo: 3,
+  },
+  {
+    id: "3",
+    nome: "Óleo",
+    quantidade: 15,
+    unidade: "un",
+    minimo: 5,
+  },
+  {
+    id: "4",
+    nome: "Macarrão",
+    quantidade: 8,
+    unidade: "pacote",
+    minimo: 10,
+  },
+];
+
 export default function HomeScreen() {
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<Product[]>(mockProducts);
 
   const [nome, setNome] = useState("");
   const [quantidade, setQuantidade] = useState("");
-  const [unidade, setUnidade] = useState("");
+  const [unidade, setUnidade] = useState("kg");
   const [minimo, setMinimo] = useState("");
 
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -35,15 +68,18 @@ export default function HomeScreen() {
       .order("created_at", { ascending: false });
 
     if (error) {
-      Alert.alert("Erro ao buscar produtos");
+      console.log("Supabase error:", error);
       return;
     }
 
-    setProducts(data || []);
+    // se tiver dados reais, usa eles
+    if (data && data.length > 0) {
+      setProducts(data);
+    }
   }
 
   async function handleSave() {
-    if (!nome || !quantidade || !unidade || !minimo) {
+    if (!nome || !quantidade || !minimo) {
       Alert.alert("Preencha todos os campos");
       return;
     }
@@ -60,6 +96,7 @@ export default function HomeScreen() {
         .eq("id", editingId);
 
       if (error) {
+        console.log(error);
         Alert.alert("Erro ao editar");
         return;
       }
@@ -74,6 +111,7 @@ export default function HomeScreen() {
       });
 
       if (error) {
+        console.log(error);
         Alert.alert("Erro ao cadastrar");
         return;
       }
@@ -92,6 +130,7 @@ export default function HomeScreen() {
       .eq("id", id);
 
     if (error) {
+      console.log(error);
       Alert.alert("Erro ao excluir");
       return;
     }
@@ -113,7 +152,7 @@ export default function HomeScreen() {
 
     setNome("");
     setQuantidade("");
-    setUnidade("");
+    setUnidade("kg");
     setMinimo("");
   }
 
@@ -140,12 +179,19 @@ export default function HomeScreen() {
         onChangeText={setQuantidade}
       />
 
-      <TextInput
-        placeholder="Unidade"
-        style={styles.input}
-        value={unidade}
-        onChangeText={setUnidade}
-      />
+      <View style={styles.pickerContainer}>
+        <Picker
+          selectedValue={unidade}
+          onValueChange={(itemValue) => setUnidade(itemValue)}
+        >
+          <Picker.Item label="Quilograma (kg)" value="kg" />
+          <Picker.Item label="Litro (L)" value="L" />
+          <Picker.Item label="Unidade (un)" value="un" />
+          <Picker.Item label="Pacote" value="pacote" />
+          <Picker.Item label="Caixa" value="caixa" />
+          <Picker.Item label="Fardo" value="fardo" />
+        </Picker>
+      </View>
 
       <TextInput
         placeholder="Estoque mínimo"
@@ -221,6 +267,14 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 12,
     marginBottom: 10,
+  },
+
+  pickerContainer: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 8,
+    marginBottom: 10,
+    overflow: "hidden",
   },
 
   button: {
