@@ -1,6 +1,7 @@
 
 Plano da estrutura do projeto:
 
+```bash
 app-stock/
 │
 ├── app/
@@ -113,3 +114,4 @@ app-stock/
 ├── tsconfig.json
 ├── package.json
 └── eas.json
+```
