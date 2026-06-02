@@ -1,68 +1,37 @@
-import {
-    useEffect,
-    useState,
-} from "react";
+import { useEffect, useState } from "react";
 
 import {
-    Alert,
-    Button,
-    ScrollView,
-    Text,
-    TextInput,
+  Alert,
+  Button,
+  ScrollView,
+  TextInput,
 } from "react-native";
 
 import {
-    router,
-    useLocalSearchParams,
+  router,
+  useLocalSearchParams,
 } from "expo-router";
 
 import {
-    useBasket,
-    useUpdateBasket,
+  useBasket,
+  useUpdateBasket,
 } from "../../../src/hooks/useBaskets";
 
-import {
-    useFamilies,
-} from "../../../src/hooks/useFamilies";
-
 export default function EditBasket() {
-  const { id } =
-    useLocalSearchParams<{
-      id: string;
-    }>();
+  const { id } = useLocalSearchParams<{ id: string }>();
 
-  const { data: basket } =
-    useBasket(id);
+  const { data: basket } = useBasket(id);
 
-  const { data: families } =
-    useFamilies();
+  const updateBasket = useUpdateBasket();
 
-  const updateBasket =
-    useUpdateBasket();
-
-  const [nome, setNome] =
-    useState("");
-
-  const [descricao, setDescricao] =
-    useState("");
-
-  const [familyId, setFamilyId] =
-    useState("");
+  const [nome, setNome] = useState("");
+  const [descricao, setDescricao] = useState("");
 
   useEffect(() => {
     if (!basket) return;
 
-    setNome(
-      basket.nome
-    );
-
-    setDescricao(
-      basket.descricao ?? ""
-    );
-
-    setFamilyId(
-      basket.family_id
-    );
+    setNome(basket.nome);
+    setDescricao(basket.descricao ?? "");
   }, [basket]);
 
   async function handleSave() {
@@ -72,77 +41,33 @@ export default function EditBasket() {
         basket: {
           nome,
           descricao,
-          family_id: familyId,
         },
       });
 
-      Alert.alert(
-        "Sucesso",
-        "Cesta atualizada!"
-      );
-
+      Alert.alert("Sucesso", "Cesta atualizada!");
       router.back();
     } catch {
-      Alert.alert(
-        "Erro",
-        "Falha ao atualizar cesta"
-      );
+      Alert.alert("Erro", "Falha ao atualizar cesta");
     }
   }
 
   return (
-    <ScrollView
-      contentContainerStyle={{
-        padding: 20,
-        gap: 12,
-      }}
-    >
+    <ScrollView contentContainerStyle={{ padding: 20, gap: 12 }}>
       <TextInput
         placeholder="Nome"
         value={nome}
         onChangeText={setNome}
+        style={{ borderWidth: 1, padding: 10 }}
       />
 
       <TextInput
         placeholder="Descrição"
         value={descricao}
-        onChangeText={
-          setDescricao
-        }
+        onChangeText={setDescricao}
+        style={{ borderWidth: 1, padding: 10 }}
       />
 
-      <Text>
-        Família:
-      </Text>
-
-      {families?.map(
-        (family) => (
-          <Button
-            key={family.id}
-            title={
-              family.responsavel
-            }
-            onPress={() =>
-              setFamilyId(
-                family.id
-              )
-            }
-          />
-        )
-      )}
-
-      <Text>
-        Família selecionada:
-      </Text>
-
-      <Text>
-        {familyId}
-      </Text>
-
-      <Button
-        title="Salvar Alterações"
-        onPress={handleSave}
-      />
+      <Button title="Salvar Alterações" onPress={handleSave} />
     </ScrollView>
   );
 }

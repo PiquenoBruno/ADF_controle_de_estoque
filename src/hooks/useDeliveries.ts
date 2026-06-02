@@ -1,14 +1,15 @@
 import {
-    useMutation,
-    useQuery,
-    useQueryClient,
+  useMutation,
+  useQuery,
+  useQueryClient,
 } from "@tanstack/react-query";
 
 import {
-    createDelivery,
-    deleteDelivery,
-    getDeliveries,
-    getDeliveryById,
+  createDelivery,
+  deleteDelivery,
+  getDeliveries,
+  getDeliveryById,
+  updateDelivery,
 } from "../services/deliveries.service";
 
 export function useDeliveries() {
@@ -44,6 +45,39 @@ export function useCreateDelivery() {
       queryClient.invalidateQueries({
         queryKey: [
           "deliveries",
+        ],
+      });
+    },
+  });
+}
+
+export function useUpdateDelivery() {
+  const queryClient =
+    useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      id,
+      delivery,
+    }: {
+      id: string;
+      delivery: any;
+    }) =>
+      updateDelivery(
+        id,
+        delivery
+      ),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: [
+          "deliveries",
+        ],
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: [
+          "delivery",
         ],
       });
     },

@@ -1,8 +1,8 @@
 import { supabase } from "./supabase";
 
 import {
-    CreateDeliveryDTO,
-    Delivery,
+  CreateDeliveryDTO,
+  Delivery,
 } from "../types/delivery";
 
 export async function getDeliveries() {
@@ -41,6 +41,23 @@ export async function createDelivery(
     await supabase
       .from("deliveries")
       .insert(delivery)
+      .select()
+      .single();
+
+  if (error) throw error;
+
+  return data;
+}
+
+export async function updateDelivery(
+  id: string,
+  delivery: Partial<Delivery>
+) {
+  const { data, error } =
+    await supabase
+      .from("deliveries")
+      .update(delivery)
+      .eq("id", id)
       .select()
       .single();
 

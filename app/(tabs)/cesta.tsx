@@ -21,12 +21,9 @@ export default function Cestas() {
     error,
   } = useBaskets();
 
-  const deleteBasket =
-    useDeleteBasket();
+  const deleteBasket = useDeleteBasket();
 
-  function handleDelete(
-    id: string
-  ) {
+  function handleDelete(id: string) {
     Alert.alert(
       "Excluir Cesta",
       "Deseja realmente excluir esta cesta?",
@@ -40,19 +37,11 @@ export default function Cestas() {
           style: "destructive",
           onPress: async () => {
             try {
-              await deleteBasket.mutateAsync(
-                id
-              );
+              await deleteBasket.mutateAsync(id);
 
-              Alert.alert(
-                "Sucesso",
-                "Cesta excluída!"
-              );
+              Alert.alert("Sucesso", "Cesta excluída!");
             } catch {
-              Alert.alert(
-                "Erro",
-                "Falha ao excluir cesta"
-              );
+              Alert.alert("Erro", "Falha ao excluir cesta");
             }
           },
         },
@@ -62,13 +51,7 @@ export default function Cestas() {
 
   if (isLoading) {
     return (
-      <View
-        style={{
-          flex: 1,
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         <ActivityIndicator />
       </View>
     );
@@ -76,41 +59,22 @@ export default function Cestas() {
 
   if (error) {
     return (
-      <View
-        style={{
-          flex: 1,
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
-        <Text>
-          Erro ao carregar cestas
-        </Text>
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <Text>Erro ao carregar cestas</Text>
       </View>
     );
   }
 
   return (
-    <View
-      style={{
-        flex: 1,
-        padding: 20,
-      }}
-    >
+    <View style={{ flex: 1, padding: 20 }}>
       <Button
         title="Nova Cesta"
-        onPress={() =>
-          router.push(
-            "/baskets/create"
-          )
-        }
+        onPress={() => router.push("/baskets/create")}
       />
 
       <FlatList
         data={baskets}
-        keyExtractor={(item) =>
-          item.id
-        }
+        keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <View
             style={{
@@ -120,45 +84,21 @@ export default function Cestas() {
               borderRadius: 8,
             }}
           >
-            <Text
-              style={{
-                fontSize: 18,
-                fontWeight: "bold",
-              }}
-            >
+            <Text style={{ fontSize: 18, fontWeight: "bold" }}>
               {item.nome}
             </Text>
 
-            <Text>
-              {item.descricao}
-            </Text>
+            <Text>{item.descricao}</Text>
 
-            <Text>
-              Status: {item.status}
-            </Text>
+            {/* ❌ REMOVIDO STATUS E ENTREGUE */}
 
-            <Text>
-              Entregue:{" "}
-              {item.entregue
-                ? "Sim"
-                : "Não"}
-            </Text>
-
-            <View
-              style={{
-                marginTop: 10,
-                gap: 8,
-              }}
-            >
+            <View style={{ marginTop: 10, gap: 8 }}>
               <Button
                 title="Ver Itens"
                 onPress={() =>
                   router.push({
-                    pathname:
-                      "/baskets/details/[id]",
-                    params: {
-                      id: item.id,
-                    },
+                    pathname: "/baskets/details/[id]",
+                    params: { id: item.id },
                   })
                 }
               />
@@ -167,36 +107,22 @@ export default function Cestas() {
                 title="Editar"
                 onPress={() =>
                   router.push({
-                    pathname:
-                      "/baskets/edit/[id]",
-                    params: {
-                      id: item.id,
-                    },
+                    pathname: "/baskets/edit/[id]",
+                    params: { id: item.id },
                   })
                 }
               />
 
               <Button
                 title="Excluir"
-                onPress={() =>
-                  handleDelete(
-                    item.id
-                  )
-                }
+                onPress={() => handleDelete(item.id)}
               />
             </View>
           </View>
         )}
         ListEmptyComponent={
-          <View
-            style={{
-              marginTop: 30,
-              alignItems: "center",
-            }}
-          >
-            <Text>
-              Nenhuma cesta cadastrada
-            </Text>
+          <View style={{ marginTop: 30, alignItems: "center" }}>
+            <Text>Nenhuma cesta cadastrada</Text>
           </View>
         }
       />
