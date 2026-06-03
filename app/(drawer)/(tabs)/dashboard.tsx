@@ -1,11 +1,11 @@
 import {
-  ActivityIndicator,
-  ScrollView,
-  Text,
-  View,
+    ActivityIndicator,
+    ScrollView,
+    Text,
+    View,
 } from "react-native";
 
-import { useDashboard } from "../../src/hooks/useDashboard";
+import { useDashboard } from "../../../src/hooks/useDashboard";
 
 export default function Dashboard() {
   const {

@@ -1,18 +1,18 @@
 import {
-  ActivityIndicator,
-  Alert,
-  Button,
-  FlatList,
-  Text,
-  View,
+    ActivityIndicator,
+    Alert,
+    Button,
+    FlatList,
+    Text,
+    View,
 } from "react-native";
 
 import { router } from "expo-router";
 
 import {
-  useBaskets,
-  useDeleteBasket,
-} from "../../src/hooks/useBaskets";
+    useBaskets,
+    useDeleteBasket,
+} from "../../../src/hooks/useBaskets";
 
 export default function Cestas() {
   const {

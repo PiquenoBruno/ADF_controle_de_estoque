@@ -14,7 +14,7 @@ export default function Login() {
   const [password, setPassword] = useState("");
 
   async function handleLogin() {
-    const { data, error } =
+    const { error } =
       await supabase.auth.signInWithPassword({
         email,
         password,
@@ -25,18 +25,10 @@ export default function Login() {
       return;
     }
 
-    console.log(
-      "✅ Login realizado:",
-      data.user?.email
-    );
+    Alert.alert("Sucesso", "Login realizado!");
 
-    Alert.alert(
-      "Sucesso",
-      "Login realizado!"
-    );
-
-    // 🔥 AQUI É A CORREÇÃO IMPORTANTE
-    router.replace("/(tabs)/dashboard");
+    // ✔ AQUI ESTAVA FALTANDO
+    router.replace("/");
   }
 
   return (
@@ -64,13 +56,6 @@ export default function Login() {
       <Button
         title="Entrar"
         onPress={handleLogin}
-      />
-
-      <Button
-        title="Criar Conta"
-        onPress={() =>
-          router.push("/(auth)/register")
-        }
       />
     </View>
   );

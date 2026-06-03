@@ -10,26 +10,26 @@ import {
 import { router } from "expo-router";
 
 import {
-    useDeleteFamily,
-    useFamilies,
-} from "../../src/hooks/useFamilies";
+    useDeleteProduct,
+    useProducts,
+} from "../../../src/hooks/useProducts";
 
-export default function Familias() {
+export default function Produtos() {
   const {
-    data: families,
+    data: products,
     isLoading,
     error,
-  } = useFamilies();
+  } = useProducts();
 
-  const deleteFamily =
-    useDeleteFamily();
+  const deleteProduct =
+    useDeleteProduct();
 
   function handleDelete(
     id: string
   ) {
     Alert.alert(
-      "Excluir Família",
-      "Deseja realmente excluir esta família?",
+      "Excluir Produto",
+      "Deseja realmente excluir este produto?",
       [
         {
           text: "Cancelar",
@@ -40,18 +40,18 @@ export default function Familias() {
           style: "destructive",
           onPress: async () => {
             try {
-              await deleteFamily.mutateAsync(
+              await deleteProduct.mutateAsync(
                 id
               );
 
               Alert.alert(
                 "Sucesso",
-                "Família excluída!"
+                "Produto excluído!"
               );
-            } catch {
+            } catch (error) {
               Alert.alert(
                 "Erro",
-                "Falha ao excluir família"
+                "Falha ao excluir produto"
               );
             }
           },
@@ -84,7 +84,7 @@ export default function Familias() {
         }}
       >
         <Text>
-          Erro ao carregar famílias
+          Erro ao carregar produtos
         </Text>
       </View>
     );
@@ -98,16 +98,16 @@ export default function Familias() {
       }}
     >
       <Button
-        title="Nova Família"
+        title="Novo Produto"
         onPress={() =>
           router.push(
-            "../families/create"
+            "/products/create"
           )
         }
       />
 
       <FlatList
-        data={families}
+        data={products}
         keyExtractor={(item) =>
           item.id
         }
@@ -126,23 +126,34 @@ export default function Familias() {
                 fontWeight: "bold",
               }}
             >
-              {item.responsavel}
+              {item.nome}
             </Text>
 
             <Text>
-              Telefone:{" "}
-              {item.telefone}
+              Quantidade:{" "}
+              {item.quantidade}
             </Text>
 
             <Text>
-              Pessoas:{" "}
-              {item.quantidade_pessoas}
+              Unidade:{" "}
+              {item.unidade}
             </Text>
 
             <Text>
-              Endereço:{" "}
-              {item.endereco}
+              Mínimo:{" "}
+              {item.minimo}
             </Text>
+
+            {item.quantidade <=
+              item.minimo && (
+              <Text
+                style={{
+                  marginTop: 5,
+                }}
+              >
+                ⚠ Estoque Baixo
+              </Text>
+            )}
 
             <View
               style={{
@@ -155,7 +166,7 @@ export default function Familias() {
                 onPress={() =>
                   router.push({
                     pathname:
-                      "/families/edit/[id]",
+                      "/products/edit/[id]",
                     params: {
                       id: item.id,
                     },
@@ -182,7 +193,7 @@ export default function Familias() {
             }}
           >
             <Text>
-              Nenhuma família cadastrada
+              Nenhum produto cadastrado
             </Text>
           </View>
         }

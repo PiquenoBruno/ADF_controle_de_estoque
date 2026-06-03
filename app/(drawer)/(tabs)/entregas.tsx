@@ -1,6 +1,5 @@
 import {
     ActivityIndicator,
-    Alert,
     Button,
     FlatList,
     Text,
@@ -10,55 +9,15 @@ import {
 import { router } from "expo-router";
 
 import {
-    useDeleteProduct,
-    useProducts,
-} from "../../src/hooks/useProducts";
+    useDeliveries,
+} from "../../../src/hooks/useDeliveries";
 
-export default function Produtos() {
+export default function Entregas() {
   const {
-    data: products,
+    data: deliveries,
     isLoading,
     error,
-  } = useProducts();
-
-  const deleteProduct =
-    useDeleteProduct();
-
-  function handleDelete(
-    id: string
-  ) {
-    Alert.alert(
-      "Excluir Produto",
-      "Deseja realmente excluir este produto?",
-      [
-        {
-          text: "Cancelar",
-          style: "cancel",
-        },
-        {
-          text: "Excluir",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              await deleteProduct.mutateAsync(
-                id
-              );
-
-              Alert.alert(
-                "Sucesso",
-                "Produto excluído!"
-              );
-            } catch (error) {
-              Alert.alert(
-                "Erro",
-                "Falha ao excluir produto"
-              );
-            }
-          },
-        },
-      ]
-    );
-  }
+  } = useDeliveries();
 
   if (isLoading) {
     return (
@@ -84,7 +43,7 @@ export default function Produtos() {
         }}
       >
         <Text>
-          Erro ao carregar produtos
+          Erro ao carregar entregas
         </Text>
       </View>
     );
@@ -98,16 +57,16 @@ export default function Produtos() {
       }}
     >
       <Button
-        title="Novo Produto"
+        title="Nova Entrega"
         onPress={() =>
           router.push(
-            "/products/create"
+            "/deliveries/create"
           )
         }
       />
 
       <FlatList
-        data={products}
+        data={deliveries}
         keyExtractor={(item) =>
           item.id
         }
@@ -126,34 +85,23 @@ export default function Produtos() {
                 fontWeight: "bold",
               }}
             >
-              {item.nome}
+              {item.basket_name}
             </Text>
 
             <Text>
-              Quantidade:{" "}
-              {item.quantidade}
+              Família: {item.family_id}
             </Text>
 
             <Text>
-              Unidade:{" "}
-              {item.unidade}
+              Data:{" "}
+              {new Date(
+                item.delivered_at
+              ).toLocaleDateString()}
             </Text>
 
             <Text>
-              Mínimo:{" "}
-              {item.minimo}
+              Status: {item.status}
             </Text>
-
-            {item.quantidade <=
-              item.minimo && (
-              <Text
-                style={{
-                  marginTop: 5,
-                }}
-              >
-                ⚠ Estoque Baixo
-              </Text>
-            )}
 
             <View
               style={{
@@ -162,11 +110,11 @@ export default function Produtos() {
               }}
             >
               <Button
-                title="Editar"
+                title="Detalhes"
                 onPress={() =>
                   router.push({
                     pathname:
-                      "/products/edit/[id]",
+                      "/deliveries/details/[id]",
                     params: {
                       id: item.id,
                     },
@@ -174,14 +122,29 @@ export default function Produtos() {
                 }
               />
 
-              <Button
-                title="Excluir"
-                onPress={() =>
-                  handleDelete(
-                    item.id
-                  )
-                }
-              />
+              {item.status ===
+                "Pendente" && (
+                <Text>
+                  ⏳ Aguardando
+                  confirmação
+                </Text>
+              )}
+
+              {item.status ===
+                "Entregue" && (
+                <Text>
+                  ✅ Entrega
+                  confirmada
+                </Text>
+              )}
+
+              {item.status ===
+                "Cancelada" && (
+                <Text>
+                  ❌ Entrega
+                  cancelada
+                </Text>
+              )}
             </View>
           </View>
         )}
@@ -193,7 +156,8 @@ export default function Produtos() {
             }}
           >
             <Text>
-              Nenhum produto cadastrado
+              Nenhuma entrega
+              cadastrada
             </Text>
           </View>
         }

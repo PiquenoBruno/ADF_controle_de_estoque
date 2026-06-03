@@ -1,5 +1,6 @@
 import {
     ActivityIndicator,
+    Alert,
     Button,
     FlatList,
     Text,
@@ -9,15 +10,55 @@ import {
 import { router } from "expo-router";
 
 import {
-    useDeliveries,
-} from "../../src/hooks/useDeliveries";
+    useDeleteFamily,
+    useFamilies,
+} from "../../../src/hooks/useFamilies";
 
-export default function Entregas() {
+export default function Familias() {
   const {
-    data: deliveries,
+    data: families,
     isLoading,
     error,
-  } = useDeliveries();
+  } = useFamilies();
+
+  const deleteFamily =
+    useDeleteFamily();
+
+  function handleDelete(
+    id: string
+  ) {
+    Alert.alert(
+      "Excluir Família",
+      "Deseja realmente excluir esta família?",
+      [
+        {
+          text: "Cancelar",
+          style: "cancel",
+        },
+        {
+          text: "Excluir",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await deleteFamily.mutateAsync(
+                id
+              );
+
+              Alert.alert(
+                "Sucesso",
+                "Família excluída!"
+              );
+            } catch {
+              Alert.alert(
+                "Erro",
+                "Falha ao excluir família"
+              );
+            }
+          },
+        },
+      ]
+    );
+  }
 
   if (isLoading) {
     return (
@@ -43,7 +84,7 @@ export default function Entregas() {
         }}
       >
         <Text>
-          Erro ao carregar entregas
+          Erro ao carregar famílias
         </Text>
       </View>
     );
@@ -57,16 +98,16 @@ export default function Entregas() {
       }}
     >
       <Button
-        title="Nova Entrega"
+        title="Nova Família"
         onPress={() =>
           router.push(
-            "/deliveries/create"
+            "../families/create"
           )
         }
       />
 
       <FlatList
-        data={deliveries}
+        data={families}
         keyExtractor={(item) =>
           item.id
         }
@@ -85,22 +126,22 @@ export default function Entregas() {
                 fontWeight: "bold",
               }}
             >
-              {item.basket_name}
+              {item.responsavel}
             </Text>
 
             <Text>
-              Família: {item.family_id}
+              Telefone:{" "}
+              {item.telefone}
             </Text>
 
             <Text>
-              Data:{" "}
-              {new Date(
-                item.delivered_at
-              ).toLocaleDateString()}
+              Pessoas:{" "}
+              {item.quantidade_pessoas}
             </Text>
 
             <Text>
-              Status: {item.status}
+              Endereço:{" "}
+              {item.endereco}
             </Text>
 
             <View
@@ -110,11 +151,11 @@ export default function Entregas() {
               }}
             >
               <Button
-                title="Detalhes"
+                title="Editar"
                 onPress={() =>
                   router.push({
                     pathname:
-                      "/deliveries/details/[id]",
+                      "/families/edit/[id]",
                     params: {
                       id: item.id,
                     },
@@ -122,29 +163,14 @@ export default function Entregas() {
                 }
               />
 
-              {item.status ===
-                "Pendente" && (
-                <Text>
-                  ⏳ Aguardando
-                  confirmação
-                </Text>
-              )}
-
-              {item.status ===
-                "Entregue" && (
-                <Text>
-                  ✅ Entrega
-                  confirmada
-                </Text>
-              )}
-
-              {item.status ===
-                "Cancelada" && (
-                <Text>
-                  ❌ Entrega
-                  cancelada
-                </Text>
-              )}
+              <Button
+                title="Excluir"
+                onPress={() =>
+                  handleDelete(
+                    item.id
+                  )
+                }
+              />
             </View>
           </View>
         )}
@@ -156,8 +182,7 @@ export default function Entregas() {
             }}
           >
             <Text>
-              Nenhuma entrega
-              cadastrada
+              Nenhuma família cadastrada
             </Text>
           </View>
         }
