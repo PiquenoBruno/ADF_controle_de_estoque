@@ -1,117 +1,118 @@
+🧺 CESTA MANAGER V3
 
-Plano da estrutura do projeto:
+Sistema inteligente de gestão de cestas básicas, famílias e logística social
+
+📱 Mobile App (Expo) • 🔥 Supabase • ⚡ Tempo real • 📊 Gestão completa
+
+🚀 O que é o ADF Cesta Manager?
+
+O CESTA MANAGER V3 é uma plataforma mobile criada para automatizar e organizar toda a operação de distribuição de cestas básicas, incluindo:
+
+Controle de estoque de alimentos
+Cadastro de famílias beneficiárias
+Montagem inteligente de cestas
+Registro de entregas
+Gestão de usuários do sistema
+Dashboard operacional
+
+💡 Pensado para ONGs, projetos sociais e iniciativas de assistência comunitária.
+
+✨ Diferenciais do Sistema
+⚡ Arquitetura modular por domínio
+🔥 Integração completa com Supabase (Auth + DB + API)
+🧠 Hooks inteligentes por módulo (Users, Products, Families…)
+📦 Controle de estoque em tempo real
+🧺 Montagem dinâmica de cestas
+🚚 Logística de entregas rastreável
+📊 Base preparada para dashboard analítico
+🧱 Stack Tecnológica
+⚛️ React Native (Expo Router)
+🟦 TypeScript
+🔥 Supabase (Backend completo serverless)
+🧭 File-based routing
+🧠 Custom Hooks Architecture
+🎨 StyleSheet (UI leve e performática)
+🏗️ Arquitetura do Sistema
+
+
+
+📁 Estrutura do Projeto
+
 
 ```bash
-app-stock/
+CESTA_MANAGER_V3
 │
-├── app/
-│   ├── _layout.tsx
-│   ├── index.tsx               
+├── app
+│   ├── menu
+│   │   ├── users.tsx
+│   │   └── _layout.tsx
+│   │
+│   ├── baskets
+│   ├── deliveries
+│   ├── families
+│   ├── products
+│   └── users
+│       ├── createUsers.tsx
+│       ├── editUsers.tsx
+│       ├── _layout.tsx
+│       └── index.tsx
 │
-│   ├── (auth)/
-│   │   ├── _layout.tsx
-│   │   ├── login.tsx
-│   │   └── forgot-password.tsx
+├── app-example
+├── assets
+├── node_modules
 │
-│   ├── (tabs)/
-│   │   ├── _layout.tsx
-│   │   ├── dashboard.tsx
-│   │   ├── produtos.tsx
-│   │   ├── familias.tsx
-│   │   ├── cestas.tsx
-│   │   └── entregas.tsx
-│
-│   ├── products/
-│   │   ├── create.tsx
-│   │   ├── edit/
-│   │   │   └── [id].tsx
-│   │   └── details/
-│   │       └── [id].tsx
-│
-│   ├── families/
-│   │   ├── create.tsx
-│   │   ├── edit/
-│   │   │   └── [id].tsx
-│   │   └── details/
-│   │       └── [id].tsx
-│
-│   ├── baskets/
-│   │   ├── create.tsx
-│   │   ├── edit/
-│   │   │   └── [id].tsx
-│   │   └── details/
-│   │       └── [id].tsx
-│
-│   └── deliveries/
-│       ├── create.tsx
-│       └── details/
-│           └── [id].tsx
-│
-├── src/
-│
-│   ├── components/
-│   │   ├── ui/
-│   │   │   ├── Button.tsx
-│   │   │   ├── Input.tsx
-│   │   │   ├── Card.tsx
-│   │   │   ├── Loading.tsx
-│   │   │   └── EmptyState.tsx
-│   │   │
-│   │   ├── ProductCard.tsx
-│   │   ├── FamilyCard.tsx
-│   │   ├── BasketCard.tsx
-│   │   └── DeliveryCard.tsx
-│
-│   ├── services/
-│   │   ├── supabase.ts
-│   │   ├── auth.service.ts
-│   │   ├── products.service.ts
-│   │   ├── families.service.ts
-│   │   ├── baskets.service.ts
-│   │   └── deliveries.service.ts
-│
-│   ├── hooks/
+├── src
+│   ├── components
+│   ├── hooks
 │   │   ├── useAuth.ts
-│   │   ├── useProducts.ts
-│   │   ├── useFamilies.ts
+│   │   ├── useBasketItems.ts
 │   │   ├── useBaskets.ts
-│   │   └── useDeliveries.ts
-│
-│   ├── providers/
-│   │   ├── AuthProvider.tsx
-│   │   └── QueryProvider.tsx
-│
-│   ├── types/
-│   │   ├── database.ts
-│   │   ├── product.ts
-│   │   ├── family.ts
-│   │   ├── basket.ts
-│   │   └── delivery.ts
-│
-│   ├── validations/
-│   │   ├── product.schema.ts
-│   │   ├── family.schema.ts
-│   │   ├── basket.schema.ts
-│   │   └── login.schema.ts
-│
-│   ├── constants/
-│   │   ├── colors.ts
-│   │   └── routes.ts
-│
-│   └── utils/
-│       ├── formatDate.ts
-│       ├── formatPhone.ts
-│       └── stock.ts
-│
-├── assets/
-│   ├── logo.png
-│   ├── icon.png
-│   └── splash.png
+│   │   ├── useDashboard.ts
+│   │   ├── useDeliveries.ts
+│   │   ├── useFamilies.ts
+│   │   ├── useProducts.ts
+│   │   └── useUsers.ts
+│   │
+│   ├── providers
+│   ├── services
+│   │   ├── auth.service.ts
+│   │   ├── basketItems.service.ts
+│   │   ├── baskets.service.ts
+│   │   ├── dashboard.service.ts
+│   │   ├── delivery-builder.service.ts
+│   │   ├── deliveries.service.ts
+│   │   ├── families.service.ts
+│   │   ├── product.service.ts
+│   │   ├── stock.service.ts
+│   │   ├── supabase.ts
+│   │   └── users.service.ts
+│   │
+│   ├── style
+│   │   └── style.js
+│   │
+│   └── types
+│       ├── basket.ts
+│       ├── basketItem.ts
+│       ├── delivery.ts
+│       ├── family.ts
+│       └── product.ts
 │
 ├── .env
-├── app.json
-├── babel.config.js
-├── tsconfig.json
-├── package.json
-└── eas.json
+└── .gitignore
+
 ```
+
+
+
+
+
+Este sistema foi projetado como um MVP escalável, podendo evoluir para:
+
+SaaS para ONGs
+Plataforma de assistência social
+Controle logístico completo de doações
+
+
+👨‍💻 Desenvolvedor
+
+Bruno Torres
