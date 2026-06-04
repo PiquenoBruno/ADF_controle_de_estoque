@@ -1,43 +1,50 @@
-🧺 CESTA MANAGER V3
+# 🧺 CESTA MANAGER V3
 
-Sistema inteligente de gestão de cestas básicas, famílias e logística social
+Sistema inteligente de gestão de cestas básicas, famílias e logística social  
 
-📱 Mobile App (Expo) • 🔥 Supabase • ⚡ Tempo real • 📊 Gestão completa
+📱 Mobile App (Expo) • 🔥 Supabase • ⚡ Tempo real • 📊 Gestão completa  
 
-🚀 O que é o ADF Cesta Manager?
+---
 
-O CESTA MANAGER V3 é uma plataforma mobile criada para automatizar e organizar toda a operação de distribuição de cestas básicas, incluindo:
+## 🚀 O que é o ADF Cesta Manager?
 
-Controle de estoque de alimentos
-Cadastro de famílias beneficiárias
-Montagem inteligente de cestas
-Registro de entregas
-Gestão de usuários do sistema
-Dashboard operacional
+O **CESTA MANAGER V3** é uma plataforma mobile criada para automatizar e organizar toda a operação de distribuição de cestas básicas, incluindo:
 
-💡 Pensado para ONGs, projetos sociais e iniciativas de assistência comunitária.
+- Controle de estoque de alimentos  
+- Cadastro de famílias beneficiárias  
+- Montagem inteligente de cestas  
+- Registro de entregas  
+- Gestão de usuários do sistema  
+- Dashboard operacional  
 
-✨ Diferenciais do Sistema
-⚡ Arquitetura modular por domínio
-🔥 Integração completa com Supabase (Auth + DB + API)
-🧠 Hooks inteligentes por módulo (Users, Products, Families…)
-📦 Controle de estoque em tempo real
-🧺 Montagem dinâmica de cestas
-🚚 Logística de entregas rastreável
-📊 Base preparada para dashboard analítico
-🧱 Stack Tecnológica
-⚛️ React Native (Expo Router)
-🟦 TypeScript
-🔥 Supabase (Backend completo serverless)
-🧭 File-based routing
-🧠 Custom Hooks Architecture
-🎨 StyleSheet (UI leve e performática)
-🏗️ Arquitetura do Sistema
+💡 Pensado para ONGs, projetos sociais e iniciativas de assistência comunitária.  
 
+---
 
+## ✨ Diferenciais do Sistema
 
-📁 Estrutura do Projeto
+- ⚡ Arquitetura modular por domínio  
+- 🔥 Integração completa com Supabase (Auth + DB + API)  
+- 🧠 Hooks inteligentes por módulo (Users, Products, Families…)  
+- 📦 Controle de estoque em tempo real  
+- 🧺 Montagem dinâmica de cestas  
+- 🚚 Logística de entregas rastreável  
+- 📊 Base preparada para dashboard analítico  
 
+---
+
+## 🧱 Stack Tecnológica
+
+- ⚛️ React Native (Expo Router)  
+- 🟦 TypeScript  
+- 🔥 Supabase (Backend completo serverless)  
+- 🧭 File-based routing  
+- 🧠 Custom Hooks Architecture  
+- 🎨 StyleSheet (UI leve e performática)  
+
+---
+
+## 📁 Estrutura do Projeto
 
 ```bash
 CESTA_MANAGER_V3
@@ -99,20 +106,17 @@ CESTA_MANAGER_V3
 │
 ├── .env
 └── .gitignore
-
+🧠 Visão de Produto
 ```
-
-
-
-
 
 Este sistema foi projetado como um MVP escalável, podendo evoluir para:
 
 SaaS para ONGs
+
 Plataforma de assistência social
+
 Controle logístico completo de doações
 
-
 👨‍💻 Desenvolvedor
-
 Bruno Torres
+
