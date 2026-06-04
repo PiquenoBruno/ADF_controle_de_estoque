@@ -27,7 +27,7 @@ export default function Login() {
 
     Alert.alert("Sucesso", "Login realizado!");
 
-    // ✔ AQUI ESTAVA FALTANDO
+
     router.replace("/");
   }
 
