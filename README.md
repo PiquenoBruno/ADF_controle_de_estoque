@@ -50,14 +50,35 @@ O **CESTA MANAGER V3** é uma plataforma mobile criada para automatizar e organi
 CESTA_MANAGER_V3
 │
 ├── app
+│   ├── (auth)
+│   ├── (drawer)
 │   ├── menu
 │   │   ├── users.tsx
 │   │   └── _layout.tsx
 │   │
 │   ├── baskets
+│   │   ├── create.tsx
+│   │   ├── edit.tsx
+│   │   ├── details.tsx
+│   │   └── index.tsx
+│   │
 │   ├── deliveries
+│   │   ├── create.tsx
+│   │   ├── details.tsx
+│   │   └── index.tsx
+│   │
 │   ├── families
+│   │   ├── create.tsx
+│   │   ├── edit.tsx
+│   │   ├── details.tsx
+│   │   └── index.tsx
+│   │
 │   ├── products
+│   │   ├── create.tsx
+│   │   ├── edit.tsx
+│   │   ├── details.tsx
+│   │   └── index.tsx
+│   │
 │   └── users
 │       ├── createUsers.tsx
 │       ├── editUsers.tsx
@@ -106,7 +127,7 @@ CESTA_MANAGER_V3
 │
 ├── .env
 └── .gitignore
-🧠 Visão de Produto
+
 ```
 
 Este sistema foi projetado como um MVP escalável, podendo evoluir para:
