@@ -7,5 +7,5 @@ export type Basket = {
 
 export type CreateBasketDTO = {
   nome: string;
-  descricao: string;
+  descricao?: string;
 };

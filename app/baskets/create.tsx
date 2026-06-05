@@ -1,148 +1,125 @@
 import { useState } from "react";
-
 import {
-    Alert,
-    Button,
-    ScrollView,
-    Text,
-    TextInput,
-    View,
+  Alert,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 import { router } from "expo-router";
 
 import { useCreateBasket } from "../../src/hooks/useBaskets";
-import { useFamilies } from "../../src/hooks/useFamilies";
+import { colors } from "../../src/style/style";
 
 export default function CreateBasket() {
-  const createBasket =
-    useCreateBasket();
+  const createBasket = useCreateBasket();
 
-  const { data: families } =
-    useFamilies();
-
-  const [nome, setNome] =
-    useState("");
-
-  const [descricao, setDescricao] =
-    useState("");
-
-  const [familyId, setFamilyId] =
-    useState("");
+  const [nome, setNome] = useState("");
+  const [descricao, setDescricao] = useState("");
 
   async function handleSave() {
-    if (!nome.trim()) {
-      Alert.alert(
-        "Atenção",
-        "Informe o nome da cesta."
-      );
-      return;
-    }
+    const basketName = nome.trim();
 
-    if (!familyId) {
-      Alert.alert(
-        "Atenção",
-        "Selecione uma família."
-      );
+    if (!basketName) {
+      Alert.alert("Atenção", "Informe o nome da cesta.");
       return;
     }
 
     try {
       await createBasket.mutateAsync({
-        nome,
+        nome: basketName,
         descricao,
-        family_id: familyId,
-        status: "Pendente",
-        entregue: false,
       });
 
-      Alert.alert(
-        "Sucesso",
-        "Cesta cadastrada!"
-      );
-
+      Alert.alert("Sucesso", "Cesta cadastrada!");
       router.back();
     } catch (error: any) {
-      Alert.alert(
-        "Erro",
-        error?.message ||
-          "Falha ao cadastrar cesta"
-      );
+      Alert.alert("Erro", error?.message || "Falha ao cadastrar cesta");
     }
   }
 
   return (
-    <ScrollView
-      contentContainerStyle={{
-        padding: 20,
-      }}
-    >
-      <TextInput
-        placeholder="Nome da cesta"
-        value={nome}
-        onChangeText={setNome}
-        style={{
-          borderWidth: 1,
-          padding: 12,
-          borderRadius: 8,
-          marginBottom: 12,
-        }}
-      />
+    <ScrollView contentContainerStyle={styles.container}>
+      <Text style={styles.title}>Nova Cesta</Text>
 
-      <TextInput
-        placeholder="Descrição"
-        value={descricao}
-        onChangeText={setDescricao}
-        multiline
-        style={{
-          borderWidth: 1,
-          padding: 12,
-          borderRadius: 8,
-          marginBottom: 20,
-        }}
-      />
+      <View style={styles.card}>
+        <TextInput
+          placeholder="Nome da cesta"
+          value={nome}
+          onChangeText={setNome}
+          style={styles.input}
+        />
 
-      <Text
-        style={{
-          fontSize: 16,
-          fontWeight: "bold",
-          marginBottom: 10,
-        }}
-      >
-        Selecione a família
-      </Text>
+        <TextInput
+          placeholder="Descrição (opcional)"
+          value={descricao}
+          onChangeText={setDescricao}
+          multiline
+          style={[styles.input, styles.textArea]}
+        />
+      </View>
 
-      {families?.map((family) => (
-        <View
-          key={family.id}
-          style={{
-            marginBottom: 8,
-          }}
-        >
-          <Button
-            title={family.responsavel}
-            onPress={() =>
-              setFamilyId(family.id)
-            }
-          />
-        </View>
-      ))}
-
-      <Text
-        style={{
-          marginTop: 20,
-          marginBottom: 20,
-        }}
-      >
-        Família selecionada:
-        {" "}
-        {familyId || "Nenhuma"}
-      </Text>
-
-      <Button
-        title="Salvar Cesta"
+      <TouchableOpacity
+        style={styles.button}
         onPress={handleSave}
-      />
+        disabled={createBasket.isPending}
+      >
+        <Text style={styles.buttonText}>
+          {createBasket.isPending ? "Salvando..." : "Salvar Cesta"}
+        </Text>
+      </TouchableOpacity>
     </ScrollView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    padding: 16,
+    backgroundColor: "#FFF",
+  },
+
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: colors.colorAlivio,
+    marginBottom: 16,
+  },
+
+  card: {
+    backgroundColor: "#FFF",
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+    marginBottom: 20,
+  },
+
+  input: {
+    borderWidth: 1,
+    borderColor: colors.color8,
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 12,
+  },
+
+  textArea: {
+    height: 90,
+    textAlignVertical: "top",
+  },
+
+  button: {
+    backgroundColor: colors.color1,
+    padding: 14,
+    borderRadius: 12,
+    alignItems: "center",
+  },
+
+  buttonText: {
+    color: "#FFF",
+    fontWeight: "bold",
+    fontSize: 16,
+  },
+});

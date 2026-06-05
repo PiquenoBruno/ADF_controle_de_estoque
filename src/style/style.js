@@ -1,5 +1,5 @@
 // Paleta de cores
-const colors = {
+export const colors = {
   color1: "#FEA50D",
   color2: "#D9870A",
   color3: "#B46807",
@@ -13,7 +13,7 @@ const colors = {
 };
 
 // Tipografia Bebas Neue
-const fonts = {
+export const fonts = {
   a1: "700 72px/auto 'Bebas Neue', sans-serif",
   a2: "700 48px/auto 'Bebas Neue', sans-serif",
   a3: "700 32px/auto 'Bebas Neue', sans-serif",

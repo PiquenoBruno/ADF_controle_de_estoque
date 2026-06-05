@@ -2,10 +2,11 @@ import { useState } from "react";
 
 import {
   Alert,
-  Button,
   FlatList,
+  StyleSheet,
   Text,
   TextInput,
+  TouchableOpacity,
   View,
 } from "react-native";
 
@@ -19,28 +20,36 @@ import {
 
 import { useProducts } from "../../../src/hooks/useProducts";
 
+import { colors } from "../../../src/style/style";
+
 export default function BasketDetails() {
   const { id } = useLocalSearchParams<{ id: string }>();
 
   const { data: items } = useBasketItems(id!);
-  const { data: products } = useProducts();
+  const { data: products = [] } = useProducts();
 
   const createItem = useCreateBasketItem();
   const deleteItem = useDeleteBasketItem();
 
   const [productId, setProductId] = useState("");
   const [quantidade, setQuantidade] = useState("");
+  const [openProducts, setOpenProducts] = useState(false);
+  const [search, setSearch] = useState("");
+
+  const selectedProduct = products?.find(
+    (p) => p.id === productId
+  );
 
   async function handleAdd() {
     if (!id) return;
 
     if (!productId) {
-      Alert.alert("Selecione um produto");
+      Alert.alert("Erro", "Selecione um produto");
       return;
     }
 
     if (!quantidade || Number(quantidade) <= 0) {
-      Alert.alert("Informe uma quantidade válida");
+      Alert.alert("Erro", "Informe uma quantidade válida");
       return;
     }
 
@@ -53,6 +62,7 @@ export default function BasketDetails() {
 
       setQuantidade("");
       setProductId("");
+      setOpenProducts(false);
 
       Alert.alert("Sucesso", "Produto adicionado");
     } catch (error: any) {
@@ -63,7 +73,6 @@ export default function BasketDetails() {
   async function handleDelete(itemId: string) {
     try {
       await deleteItem.mutateAsync(itemId);
-
       Alert.alert("Sucesso", "Item removido");
     } catch {
       Alert.alert("Erro", "Falha ao remover item");
@@ -71,64 +80,311 @@ export default function BasketDetails() {
   }
 
   return (
-    <View style={{ flex: 1, padding: 20 }}>
-      <Text style={{ fontSize: 22, fontWeight: "bold", marginBottom: 20 }}>
-        Itens da Cesta
-      </Text>
+    <View style={styles.container}>
+      {/* TITLE */}
+      <Text style={styles.title}>Itens da Cesta</Text>
 
-      <Text>Escolha um produto:</Text>
+      {/* SELECTOR */}
+      <View style={styles.card}>
+        <TouchableOpacity
+          style={styles.dropdownHeader}
+          onPress={() =>
+            setOpenProducts(!openProducts)
+          }
+        >
+          <Text style={styles.dropdownHeaderText}>
+            {productId
+              ? selectedProduct?.nome
+              : "Selecionar produto"}
+          </Text>
 
-      {products?.map((product) => (
-        <View key={product.id} style={{ marginTop: 5 }}>
-          <Button
-            title={product.nome}
-            onPress={() => setProductId(product.id)}
-          />
-        </View>
-      ))}
+          <Text style={styles.dropdownArrow}>
+            {openProducts ? "▲" : "▼"}
+          </Text>
+        </TouchableOpacity>
 
-      <Text style={{ marginTop: 10 }}>
-        Produto selecionado: {productId || "Nenhum"}
-      </Text>
+        {/* DROPDOWN */}
+        {openProducts && (
+          <View style={styles.dropdownBox}>
+            <TextInput
+              placeholder="Buscar produto..."
+              value={search}
+              onChangeText={setSearch}
+              style={styles.searchInput}
+            />
 
-      <TextInput
-        placeholder="Quantidade"
-        keyboardType="numeric"
-        value={quantidade}
-        onChangeText={setQuantidade}
-        style={{
-          borderWidth: 1,
-          padding: 10,
-          marginTop: 10,
-          marginBottom: 10,
-        }}
-      />
+            <FlatList
+              data={products?.filter((p) =>
+                p.nome
+                  .toLowerCase()
+                  .includes(search.toLowerCase())
+              )}
+              keyExtractor={(item) => item.id}
+              numColumns={2}
+              columnWrapperStyle={{
+                gap: 10,
+              }}
+              contentContainerStyle={{ gap: 10 }}
+              renderItem={({ item }) => {
+                const selected =
+                  productId === item.id;
 
-      <Button title="Adicionar Produto" onPress={handleAdd} />
+                const lowStock =
+                  item.quantidade <= item.minimo;
 
-      <FlatList
-        style={{ marginTop: 20 }}
-        data={items}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View
-            style={{
-              borderWidth: 1,
-              padding: 12,
-              marginBottom: 10,
-              borderRadius: 8,
-            }}
-          >
-            <Text>Produto: {item.products?.nome}</Text>
-            <Text>Quantidade: {item.quantidade}</Text>
+                return (
+                  <TouchableOpacity
+                    style={[
+                      styles.productCard,
+                      selected &&
+                        styles.productSelected,
+                    ]}
+                    onPress={() =>
+                      setProductId(item.id)
+                    }
+                  >
+                    <Text
+                      style={[
+                        styles.productName,
+                        selected &&
+                          styles.productNameSelected,
+                      ]}
+                    >
+                      {item.nome}
+                    </Text>
 
-            <Button
-              title="Remover"
-              onPress={() => handleDelete(item.id)}
+                    <Text
+                      style={[
+                        styles.productStock,
+                        selected &&
+                          styles.productNameSelected,
+                      ]}
+                    >
+                      {item.quantidade} un.
+                    </Text>
+
+                    {lowStock && (
+                      <Text style={styles.warning}>
+                        ⚠ baixo estoque
+                      </Text>
+                    )}
+                  </TouchableOpacity>
+                );
+              }}
             />
           </View>
         )}
+
+        <Text style={styles.info}>
+          Selecionado:{" "}
+          {selectedProduct?.nome || "Nenhum"}
+        </Text>
+
+        <TextInput
+          placeholder="Quantidade"
+          keyboardType="numeric"
+          value={quantidade}
+          onChangeText={setQuantidade}
+          style={styles.input}
+        />
+
+        <TouchableOpacity
+          style={styles.addButton}
+          onPress={handleAdd}
+        >
+          <Text style={styles.addButtonText}>
+            + Adicionar Produto
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* ITEMS LIST */}
+      <FlatList
+        data={items}
+        keyExtractor={(item) => item.id}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{
+          paddingBottom: 40,
+        }}
+        renderItem={({ item }) => {
+          const lowStock =
+            item.quantidade <= 1;
+
+          return (
+            <View style={styles.card}>
+              <Text style={styles.name}>
+                {(item as any).products?.nome}
+              </Text>
+
+              <Text style={styles.info}>
+                Quantidade: {item.quantidade}
+              </Text>
+
+              {lowStock && (
+                <Text style={styles.warning}>
+                  ⚠ Quantidade baixa
+                </Text>
+              )}
+
+              <TouchableOpacity
+                onPress={() =>
+                  handleDelete(item.id)
+                }
+              >
+                <Text style={styles.delete}>
+                  Remover
+                </Text>
+              </TouchableOpacity>
+            </View>
+          );
+        }}
+        ListEmptyComponent={
+          <View style={styles.empty}>
+            <Text style={styles.emptyText}>
+              Nenhum item na cesta
+            </Text>
+          </View>
+        }
       />
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    paddingTop: 20, // SAFE TOP
+    paddingHorizontal: 16,
+    paddingBottom: 30, // SAFE BOTTOM
+    backgroundColor: "#FFF",
+  },
+
+  title: {
+    fontSize: 22,
+    fontWeight: "bold",
+    color: colors.colorAlivio,
+    marginBottom: 12,
+  },
+
+  card: {
+    backgroundColor: "#FFF",
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+    marginBottom: 12,
+  },
+
+  dropdownHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 14,
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+    borderRadius: 12,
+    marginBottom: 10,
+  },
+
+  dropdownHeaderText: {
+    fontWeight: "bold",
+    color: colors.colorAlivio,
+  },
+
+  dropdownArrow: {
+    fontSize: 16,
+  },
+
+  dropdownBox: {
+    marginBottom: 12,
+  },
+
+  searchInput: {
+    borderWidth: 1,
+    borderColor: colors.color8,
+    borderRadius: 12,
+    padding: 10,
+    marginBottom: 10,
+  },
+
+  productCard: {
+    flex: 1,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+    borderRadius: 12,
+  },
+
+  productSelected: {
+    backgroundColor: colors.color1,
+    borderColor: colors.color1,
+  },
+
+  productName: {
+    fontWeight: "bold",
+    color: "#000",
+  },
+
+  productNameSelected: {
+    color: "#FFF",
+  },
+
+  productStock: {
+    fontSize: 12,
+    color: colors.color8,
+    marginTop: 4,
+  },
+
+  info: {
+    marginTop: 8,
+    color: colors.color8,
+  },
+
+  input: {
+    borderWidth: 1,
+    borderColor: colors.color8,
+    borderRadius: 12,
+    padding: 12,
+    marginTop: 10,
+  },
+
+  addButton: {
+    backgroundColor: colors.color1,
+    padding: 12,
+    borderRadius: 12,
+    marginTop: 12,
+    alignItems: "center",
+  },
+
+  addButtonText: {
+    color: "#FFF",
+    fontWeight: "bold",
+  },
+
+  name: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: colors.colorAlivio,
+  },
+
+  warning: {
+    marginTop: 6,
+    color: colors.colorDe,
+    fontWeight: "bold",
+  },
+
+  delete: {
+    color: colors.colorAle,
+    fontWeight: "bold",
+    marginTop: 10,
+  },
+
+  empty: {
+    marginTop: 40,
+    alignItems: "center",
+  },
+
+  emptyText: {
+    color: colors.color8,
+  },
+});

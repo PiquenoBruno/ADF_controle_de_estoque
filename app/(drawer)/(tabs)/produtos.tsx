@@ -1,58 +1,41 @@
 import {
-    ActivityIndicator,
-    Alert,
-    Button,
-    FlatList,
-    Text,
-    View,
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 import { router } from "expo-router";
 
 import {
-    useDeleteProduct,
-    useProducts,
+  useDeleteProduct,
+  useProducts,
 } from "../../../src/hooks/useProducts";
 
+import { colors } from "../../../src/style/style";
+
 export default function Produtos() {
-  const {
-    data: products,
-    isLoading,
-    error,
-  } = useProducts();
+  const { data: products, isLoading, error } = useProducts();
+  const deleteProduct = useDeleteProduct();
 
-  const deleteProduct =
-    useDeleteProduct();
-
-  function handleDelete(
-    id: string
-  ) {
+  function handleDelete(id: string) {
     Alert.alert(
       "Excluir Produto",
       "Deseja realmente excluir este produto?",
       [
-        {
-          text: "Cancelar",
-          style: "cancel",
-        },
+        { text: "Cancelar", style: "cancel" },
         {
           text: "Excluir",
           style: "destructive",
           onPress: async () => {
             try {
-              await deleteProduct.mutateAsync(
-                id
-              );
-
-              Alert.alert(
-                "Sucesso",
-                "Produto excluído!"
-              );
-            } catch (error) {
-              Alert.alert(
-                "Erro",
-                "Falha ao excluir produto"
-              );
+              await deleteProduct.mutateAsync(id);
+              Alert.alert("Sucesso", "Produto excluído!");
+            } catch {
+              Alert.alert("Erro", "Falha ao excluir produto");
             }
           },
         },
@@ -62,28 +45,16 @@ export default function Produtos() {
 
   if (isLoading) {
     return (
-      <View
-        style={{
-          flex: 1,
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
-        <ActivityIndicator />
+      <View style={styles.center}>
+        <ActivityIndicator size="large" color={colors.color1} />
       </View>
     );
   }
 
   if (error) {
     return (
-      <View
-        style={{
-          flex: 1,
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
-        <Text>
+      <View style={styles.center}>
+        <Text style={styles.errorText}>
           Erro ao carregar produtos
         </Text>
       </View>
@@ -91,108 +62,78 @@ export default function Produtos() {
   }
 
   return (
-    <View
-      style={{
-        flex: 1,
-        padding: 20,
-      }}
-    >
-      <Button
-        title="Novo Produto"
-        onPress={() =>
-          router.push(
-            "/products/create"
-          )
-        }
-      />
+    <View style={styles.container}>
+      {/* BOTÃO NOVO */}
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => router.push("/products/create")}
+      >
+        <Text style={styles.buttonText}>
+          + Novo Produto
+        </Text>
+      </TouchableOpacity>
 
+      {/* LISTA */}
       <FlatList
         data={products}
-        keyExtractor={(item) =>
-          item.id
-        }
-        renderItem={({ item }) => (
-          <View
-            style={{
-              borderWidth: 1,
-              padding: 12,
-              marginTop: 10,
-              borderRadius: 8,
-            }}
-          >
-            <Text
-              style={{
-                fontSize: 18,
-                fontWeight: "bold",
-              }}
-            >
-              {item.nome}
-            </Text>
+        keyExtractor={(item) => item.id}
+        showsVerticalScrollIndicator={false}
+        renderItem={({ item }) => {
+          const estoqueBaixo = item.quantidade <= item.minimo;
 
-            <Text>
-              Quantidade:{" "}
-              {item.quantidade}
-            </Text>
-
-            <Text>
-              Unidade:{" "}
-              {item.unidade}
-            </Text>
-
-            <Text>
-              Mínimo:{" "}
-              {item.minimo}
-            </Text>
-
-            {item.quantidade <=
-              item.minimo && (
-              <Text
-                style={{
-                  marginTop: 5,
-                }}
-              >
-                ⚠ Estoque Baixo
+          return (
+            <View style={styles.card}>
+              <Text style={styles.name}>
+                {item.nome}
               </Text>
-            )}
 
-            <View
-              style={{
-                marginTop: 10,
-                gap: 8,
-              }}
-            >
-              <Button
-                title="Editar"
-                onPress={() =>
-                  router.push({
-                    pathname:
-                      "/products/edit/[id]",
-                    params: {
-                      id: item.id,
-                    },
-                  })
-                }
-              />
+              <Text style={styles.info}>
+                Quantidade: {item.quantidade}
+              </Text>
 
-              <Button
-                title="Excluir"
-                onPress={() =>
-                  handleDelete(
-                    item.id
-                  )
-                }
-              />
+              <Text style={styles.info}>
+                Unidade: {item.unidade}
+              </Text>
+
+              <Text style={styles.info}>
+                Mínimo: {item.minimo}
+              </Text>
+
+              {estoqueBaixo && (
+                <Text style={styles.warning}>
+                  ⚠ Estoque baixo
+                </Text>
+              )}
+
+              {/* AÇÕES */}
+              <View style={styles.actions}>
+                <TouchableOpacity
+                  onPress={() =>
+                    router.push({
+                      pathname: "/products/edit/[id]",
+                      params: { id: item.id },
+                    })
+                  }
+                >
+                  <Text style={styles.edit}>
+                    Editar
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  onPress={() => handleDelete(item.id)}
+                >
+                  <Text style={styles.delete}>
+                    Excluir
+                  </Text>
+                </TouchableOpacity>
+              </View>
             </View>
-          </View>
-        )}
+          );
+        }}
         ListEmptyComponent={
-          <View
-            style={{
-              marginTop: 30,
-              alignItems: "center",
-            }}
-          >
-            <Text>
+          <View style={styles.empty}>
+            <Text style={styles.emptyText}>
               Nenhum produto cadastrado
             </Text>
           </View>
@@ -201,3 +142,91 @@ export default function Produtos() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 16,
+    backgroundColor: "#FFF",
+  },
+
+  center: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  button: {
+    backgroundColor: colors.color1,
+    padding: 14,
+    borderRadius: 12,
+    alignItems: "center",
+    marginBottom: 16,
+  },
+
+  buttonText: {
+    color: "#FFF",
+    fontWeight: "bold",
+    fontSize: 16,
+  },
+
+  card: {
+    backgroundColor: "#FFF",
+    padding: 16,
+    borderRadius: 12,
+
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+
+    marginBottom: 12,
+
+    elevation: 3,
+  },
+
+  name: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: colors.colorAlivio,
+  },
+
+  info: {
+    color: colors.color8,
+    marginTop: 4,
+  },
+
+  warning: {
+    marginTop: 8,
+    color: colors.colorDe,
+    fontWeight: "bold",
+  },
+
+  actions: {
+    flexDirection: "row",
+    gap: 20,
+    marginTop: 12,
+  },
+
+  edit: {
+    color: colors.color1,
+    fontWeight: "600",
+  },
+
+  delete: {
+    color: colors.colorAle,
+    fontWeight: "600",
+  },
+
+  empty: {
+    marginTop: 40,
+    alignItems: "center",
+  },
+
+  emptyText: {
+    color: colors.color8,
+    fontSize: 16,
+  },
+
+  errorText: {
+    color: colors.colorAle,
+  },
+});

@@ -19,84 +19,55 @@ export function useDeliveries() {
   });
 }
 
-export function useDelivery(
-  id: string
-) {
+export function useDelivery(id: string) {
   return useQuery({
-    queryKey: [
-      "delivery",
-      id,
-    ],
-    queryFn: () =>
-      getDeliveryById(id),
+    queryKey: ["delivery", id],
+    queryFn: () => getDeliveryById(id),
     enabled: !!id,
   });
 }
 
 export function useCreateDelivery() {
-  const queryClient =
-    useQueryClient();
+  const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn:
-      createDelivery,
-
+    mutationFn: createDelivery,
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: [
-          "deliveries",
-        ],
+        queryKey: ["deliveries"],
       });
     },
   });
 }
 
 export function useUpdateDelivery() {
-  const queryClient =
-    useQueryClient();
+  const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({
-      id,
-      delivery,
-    }: {
-      id: string;
-      delivery: any;
-    }) =>
-      updateDelivery(
-        id,
-        delivery
-      ),
+    mutationFn: ({ id, delivery }: any) =>
+      updateDelivery(id, delivery),
 
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
-        queryKey: [
-          "deliveries",
-        ],
+        queryKey: ["deliveries"],
       });
 
       queryClient.invalidateQueries({
-        queryKey: [
-          "delivery",
-        ],
+        queryKey: ["delivery", variables.id],
       });
     },
   });
 }
 
 export function useDeleteDelivery() {
-  const queryClient =
-    useQueryClient();
+  const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn:
-      deleteDelivery,
+    mutationFn: deleteDelivery,
 
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: [
-          "deliveries",
-        ],
+        queryKey: ["deliveries"],
       });
     },
   });

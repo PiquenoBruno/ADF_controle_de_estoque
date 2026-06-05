@@ -1,26 +1,24 @@
 import {
-    ActivityIndicator,
-    Alert,
-    Button,
-    FlatList,
-    Text,
-    View,
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 import { router } from "expo-router";
 
 import {
-    useBaskets,
-    useDeleteBasket,
+  useBaskets,
+  useDeleteBasket,
 } from "../../../src/hooks/useBaskets";
 
-export default function Cestas() {
-  const {
-    data: baskets,
-    isLoading,
-    error,
-  } = useBaskets();
+import { colors } from "../../../src/style/style";
 
+export default function Cestas() {
+  const { data: baskets, isLoading, error } = useBaskets();
   const deleteBasket = useDeleteBasket();
 
   function handleDelete(id: string) {
@@ -28,17 +26,13 @@ export default function Cestas() {
       "Excluir Cesta",
       "Deseja realmente excluir esta cesta?",
       [
-        {
-          text: "Cancelar",
-          style: "cancel",
-        },
+        { text: "Cancelar", style: "cancel" },
         {
           text: "Excluir",
           style: "destructive",
           onPress: async () => {
             try {
               await deleteBasket.mutateAsync(id);
-
               Alert.alert("Sucesso", "Cesta excluída!");
             } catch {
               Alert.alert("Erro", "Falha ao excluir cesta");
@@ -51,81 +45,188 @@ export default function Cestas() {
 
   if (isLoading) {
     return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <ActivityIndicator />
+      <View style={styles.center}>
+        <ActivityIndicator size="large" color={colors.color1} />
       </View>
     );
   }
 
   if (error) {
     return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <Text>Erro ao carregar cestas</Text>
+      <View style={styles.center}>
+        <Text style={styles.errorText}>
+          Erro ao carregar cestas
+        </Text>
       </View>
     );
   }
 
   return (
-    <View style={{ flex: 1, padding: 20 }}>
-      <Button
-        title="Nova Cesta"
+    <View style={styles.container}>
+      {/* BOTÃO NOVA */}
+      <TouchableOpacity
+        style={styles.button}
         onPress={() => router.push("/baskets/create")}
-      />
+      >
+        <Text style={styles.buttonText}>
+          + Nova Cesta
+        </Text>
+      </TouchableOpacity>
 
       <FlatList
         data={baskets}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View
-            style={{
-              borderWidth: 1,
-              padding: 12,
-              marginTop: 10,
-              borderRadius: 8,
-            }}
-          >
-            <Text style={{ fontSize: 18, fontWeight: "bold" }}>
-              {item.nome}
-            </Text>
+        showsVerticalScrollIndicator={false}
+        renderItem={({ item }) => {
+          const hasDescription = !!item.descricao;
 
-            <Text>{item.descricao}</Text>
+          return (
+            <View style={styles.card}>
+              <Text style={styles.name}>
+                {item.nome}
+              </Text>
 
-            {/* ❌ REMOVIDO STATUS E ENTREGUE */}
+              <Text style={styles.info}>
+                {item.descricao || "Sem descrição"}
+              </Text>
 
-            <View style={{ marginTop: 10, gap: 8 }}>
-              <Button
-                title="Ver Itens"
-                onPress={() =>
-                  router.push({
-                    pathname: "/baskets/details/[id]",
-                    params: { id: item.id },
-                  })
-                }
-              />
+              {!hasDescription && (
+                <Text style={styles.warning}>
+                  ⚠ Sem detalhes
+                </Text>
+              )}
 
-              <Button
-                title="Editar"
-                onPress={() =>
-                  router.push({
-                    pathname: "/baskets/edit/[id]",
-                    params: { id: item.id },
-                  })
-                }
-              />
+              <View style={styles.actions}>
+                <TouchableOpacity
+                  onPress={() =>
+                    router.push({
+                      pathname: "/baskets/details/[id]",
+                      params: { id: item.id },
+                    })
+                  }
+                >
+                  <Text style={styles.edit}>
+                    Ver Itens
+                  </Text>
+                </TouchableOpacity>
 
-              <Button
-                title="Excluir"
-                onPress={() => handleDelete(item.id)}
-              />
+                <TouchableOpacity
+                  onPress={() =>
+                    router.push({
+                      pathname: "/baskets/edit/[id]",
+                      params: { id: item.id },
+                    })
+                  }
+                >
+                  <Text style={styles.edit}>
+                    Editar
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  onPress={() => handleDelete(item.id)}
+                >
+                  <Text style={styles.delete}>
+                    Excluir
+                  </Text>
+                </TouchableOpacity>
+              </View>
             </View>
-          </View>
-        )}
+          );
+        }}
         ListEmptyComponent={
-          <View style={{ marginTop: 30, alignItems: "center" }}>
-            <Text>Nenhuma cesta cadastrada</Text>
+          <View style={styles.empty}>
+            <Text style={styles.emptyText}>
+              Nenhuma cesta cadastrada
+            </Text>
           </View>
         }
       />
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 16,
+    backgroundColor: "#FFF",
+  },
+
+  center: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  button: {
+    backgroundColor: colors.color1,
+    padding: 14,
+    borderRadius: 12,
+    alignItems: "center",
+    marginBottom: 16,
+  },
+
+  buttonText: {
+    color: "#FFF",
+    fontWeight: "bold",
+    fontSize: 16,
+  },
+
+  card: {
+    backgroundColor: "#FFF",
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+    marginBottom: 12,
+    elevation: 3,
+  },
+
+  name: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: colors.colorAlivio,
+  },
+
+  info: {
+    color: colors.color8,
+    marginTop: 4,
+  },
+
+  warning: {
+    marginTop: 8,
+    color: colors.colorDe,
+    fontWeight: "bold",
+  },
+
+  actions: {
+    flexDirection: "row",
+    gap: 20,
+    marginTop: 12,
+  },
+
+  edit: {
+    color: colors.color1,
+    fontWeight: "600",
+  },
+
+  delete: {
+    color: colors.colorAle,
+    fontWeight: "600",
+  },
+
+  empty: {
+    marginTop: 40,
+    alignItems: "center",
+  },
+
+  emptyText: {
+    color: colors.color8,
+    fontSize: 16,
+  },
+
+  errorText: {
+    color: colors.colorAle,
+  },
+});

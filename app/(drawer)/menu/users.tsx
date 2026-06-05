@@ -14,6 +14,8 @@ import {
   View,
 } from "react-native";
 
+import { colors } from "../../../src/style/style";
+
 export default function UsersList() {
   const { data, isLoading } = useUsers();
   const { mutate: deleteUser, isPending } = useDeleteUser();
@@ -21,13 +23,17 @@ export default function UsersList() {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedUser, setSelectedUser] = useState<string | null>(null);
   const [confirmText, setConfirmText] = useState("");
+  const [search, setSearch] = useState("");
 
   function handleDelete(id: string, nome: string) {
     Alert.alert(
-      "⚠️ Excluir usuário",
+      "Excluir usuário",
       `Tem certeza que deseja excluir ${nome}?`,
       [
-        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Cancelar",
+          style: "cancel",
+        },
         {
           text: "Continuar",
           style: "destructive",
@@ -48,70 +54,138 @@ export default function UsersList() {
       setSelectedUser(null);
       setConfirmText("");
     } else {
-      Alert.alert("Erro", "Digite EXCLUIR corretamente");
+      Alert.alert(
+        "Erro",
+        "Digite EXCLUIR corretamente."
+      );
     }
   }
 
+  const filteredUsers =
+    data?.filter(
+      (user) =>
+        user.nome
+          .toLowerCase()
+          .includes(search.toLowerCase()) ||
+        user.email
+          .toLowerCase()
+          .includes(search.toLowerCase())
+    ) ?? [];
+
   if (isLoading) {
-    return <ActivityIndicator style={{ flex: 1 }} />;
+    return (
+      <ActivityIndicator
+        style={{ flex: 1 }}
+        size="large"
+        color={colors.color1}
+      />
+    );
   }
 
   return (
     <View style={styles.container}>
-      {/* BOTÃO NOVO USUÁRIO */}
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => router.push("/users/createUsers")}
-      >
-        <Text style={{ color: "#fff" }}>Novo usuário</Text>
-      </TouchableOpacity>
+      {/* BUSCA */}
 
-      {/* LISTA */}
-      <FlatList
-        data={data}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View style={styles.card}>
-            <Text style={styles.name}>{item.nome}</Text>
-            <Text>{item.email}</Text>
-
-            <View style={styles.actions}>
-              {/* EDITAR */}
-              <TouchableOpacity
-                onPress={() =>
-                  router.push({
-                    pathname: "/users/editUsers",
-                    params: { id: item.id },
-                  })
-                }
-              >
-                <Text>Editar</Text>
-              </TouchableOpacity>
-
-              {/* EXCLUIR */}
-              <TouchableOpacity
-                disabled={isPending}
-                onPress={() => handleDelete(item.id, item.nome)}
-              >
-                <Text
-                  style={{
-                    color: "red",
-                    opacity: isPending ? 0.5 : 1,
-                  }}
-                >
-                  {isPending ? "Excluindo..." : "Excluir"}
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        )}
+      <TextInput
+        style={styles.searchInput}
+        placeholder="Buscar usuário..."
+        value={search}
+        onChangeText={setSearch}
       />
 
-      {/* MODAL DE CONFIRMAÇÃO */}
-      <Modal visible={modalVisible} transparent animationType="fade">
+      {/* BOTÃO NOVO */}
+
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() =>
+          router.push("/users/createUsers")
+        }
+      >
+        <Text style={styles.buttonText}>
+          + Novo Usuário
+        </Text>
+      </TouchableOpacity>
+
+      {/* LISTA VAZIA */}
+
+      {filteredUsers.length === 0 ? (
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyText}>
+            Nenhum usuário encontrado.
+          </Text>
+        </View>
+      ) : (
+        <FlatList
+          data={filteredUsers}
+          keyExtractor={(item) => item.id}
+          showsVerticalScrollIndicator={false}
+          renderItem={({ item }) => (
+            <View style={styles.card}>
+              <Text style={styles.name}>
+                {item.nome}
+              </Text>
+
+              <Text style={styles.email}>
+                {item.email}
+              </Text>
+
+              <View style={styles.actions}>
+                <TouchableOpacity
+                  onPress={() =>
+                    router.push({
+                      pathname:
+                        "/users/editUsers",
+                      params: {
+                        id: item.id,
+                      },
+                    })
+                  }
+                >
+                  <Text style={styles.editText}>
+                    Editar
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  disabled={isPending}
+                  onPress={() =>
+                    handleDelete(
+                      item.id,
+                      item.nome
+                    )
+                  }
+                >
+                  <Text
+                    style={[
+                      styles.deleteText,
+                      {
+                        opacity: isPending
+                          ? 0.5
+                          : 1,
+                      },
+                    ]}
+                  >
+                    {isPending
+                      ? "Excluindo..."
+                      : "Excluir"}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          )}
+        />
+      )}
+
+      {/* MODAL */}
+
+      <Modal
+        visible={modalVisible}
+        transparent
+        animationType="fade"
+      >
         <View style={styles.overlay}>
           <View style={styles.modal}>
-            <Text style={styles.title}>
+            <Text style={styles.modalTitle}>
               Digite EXCLUIR para confirmar
             </Text>
 
@@ -119,8 +193,8 @@ export default function UsersList() {
               value={confirmText}
               onChangeText={setConfirmText}
               placeholder="EXCLUIR"
-              style={styles.input}
               autoCapitalize="characters"
+              style={styles.input}
             />
 
             <View style={styles.modalActions}>
@@ -131,11 +205,15 @@ export default function UsersList() {
                   setConfirmText("");
                 }}
               >
-                <Text>Cancelar</Text>
+                <Text style={styles.cancelText}>
+                  Cancelar
+                </Text>
               </TouchableOpacity>
 
-              <TouchableOpacity onPress={confirmDelete}>
-                <Text style={{ color: "red", fontWeight: "bold" }}>
+              <TouchableOpacity
+                onPress={confirmDelete}
+              >
+                <Text style={styles.deleteText}>
                   Excluir
                 </Text>
               </TouchableOpacity>
@@ -147,39 +225,86 @@ export default function UsersList() {
   );
 }
 
-/**
- * STYLES
- */
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
+    backgroundColor: "#FFF",
+  },
+
+  searchInput: {
+    backgroundColor: "#FFF",
+    borderWidth: 1,
+    borderColor: colors.color8,
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    marginBottom: 12,
   },
 
   button: {
-    backgroundColor: "#2563eb",
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 10,
+    backgroundColor: colors.color1,
+    padding: 14,
+    borderRadius: 12,
+    alignItems: "center",
+    marginBottom: 16,
   },
 
-  card: {
-    padding: 12,
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 8,
-    marginBottom: 10,
-  },
-
-  name: {
+  buttonText: {
+    color: "#FFF",
     fontWeight: "bold",
     fontSize: 16,
   },
 
+  card: {
+    backgroundColor: "#FFF",
+    padding: 16,
+    borderRadius: 12,
+
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+
+    marginBottom: 12,
+
+    elevation: 3,
+  },
+
+  name: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: colors.colorAlivio,
+  },
+
+  email: {
+    color: colors.color8,
+    marginTop: 4,
+  },
+
   actions: {
     flexDirection: "row",
-    gap: 15,
-    marginTop: 10,
+    gap: 20,
+    marginTop: 12,
+  },
+
+  editText: {
+    color: colors.color1,
+    fontWeight: "600",
+  },
+
+  deleteText: {
+    color: colors.colorAle,
+    fontWeight: "600",
+  },
+
+  emptyContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  emptyText: {
+    color: colors.color8,
+    fontSize: 16,
   },
 
   overlay: {
@@ -190,25 +315,33 @@ const styles = StyleSheet.create({
   },
 
   modal: {
-    backgroundColor: "#fff",
+    backgroundColor: "#FFF",
     padding: 20,
-    borderRadius: 10,
+    borderRadius: 12,
   },
 
-  title: {
+  modalTitle: {
+    fontSize: 16,
     fontWeight: "bold",
-    marginBottom: 10,
+    color: colors.colorAlivio,
+    marginBottom: 12,
   },
 
   input: {
     borderWidth: 1,
-    borderColor: "#ccc",
-    padding: 10,
+    borderColor: colors.color8,
+    borderRadius: 8,
+    padding: 12,
     marginBottom: 15,
   },
 
   modalActions: {
     flexDirection: "row",
     justifyContent: "space-between",
+  },
+
+  cancelText: {
+    color: colors.color8,
+    fontWeight: "600",
   },
 });

@@ -1,8 +1,4 @@
-import {
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import {
   createProduct,
@@ -12,41 +8,48 @@ import {
   updateProduct,
 } from "../services/product.service";
 
+import { Product } from "../types/product";
+
+/**
+ * LISTAR PRODUTOS
+ */
 export function useProducts() {
-  return useQuery({
+  return useQuery<Product[]>({
     queryKey: ["products"],
     queryFn: getProducts,
   });
 }
 
-export function useProduct(
-  id: string
-) {
-  return useQuery({
+/**
+ * BUSCAR POR ID
+ */
+export function useProduct(id: string) {
+  return useQuery<Product>({
     queryKey: ["product", id],
     queryFn: () => getProductById(id),
     enabled: !!id,
   });
 }
 
+/**
+ * CRIAR PRODUTO
+ */
 export function useCreateProduct() {
-  const queryClient =
-    useQueryClient();
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: createProduct,
-
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["products"],
-      });
+      queryClient.invalidateQueries({ queryKey: ["products"] });
     },
   });
 }
 
+/**
+ * ATUALIZAR PRODUTO
+ */
 export function useUpdateProduct() {
-  const queryClient =
-    useQueryClient();
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: ({
@@ -60,35 +63,25 @@ export function useUpdateProduct() {
         unidade: string;
         minimo: number;
       };
-    }) =>
-      updateProduct(id, product),
+    }) => updateProduct(id, product),
 
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["products"],
-      });
-
-      queryClient.invalidateQueries({
-        queryKey: ["product"],
-      });
+      queryClient.invalidateQueries({ queryKey: ["products"] });
+      queryClient.invalidateQueries({ queryKey: ["product"] });
     },
   });
-
-  
 }
 
+/**
+ * DELETAR PRODUTO
+ */
 export function useDeleteProduct() {
-  const queryClient =
-    useQueryClient();
+  const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: string) =>
-      deleteProduct(id),
-
+    mutationFn: deleteProduct,
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["products"],
-      });
+      queryClient.invalidateQueries({ queryKey: ["products"] });
     },
   });
 }

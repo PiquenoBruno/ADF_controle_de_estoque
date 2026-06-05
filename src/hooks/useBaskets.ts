@@ -1,17 +1,22 @@
 import {
-    useMutation,
-    useQuery,
-    useQueryClient,
+  useMutation,
+  useQuery,
+  useQueryClient,
 } from "@tanstack/react-query";
 
 import {
-    createBasket,
-    deleteBasket,
-    getBasketById,
-    getBaskets,
-    updateBasket,
+  createBasket,
+  deleteBasket,
+  getBasketById,
+  getBaskets,
+  updateBasket,
 } from "../services/baskets.service";
 
+import { CreateBasketDTO } from "../types/basket";
+
+/**
+ * LISTAR
+ */
 export function useBaskets() {
   return useQuery({
     queryKey: ["baskets"],
@@ -19,23 +24,25 @@ export function useBaskets() {
   });
 }
 
-export function useBasket(
-  id: string
-) {
+/**
+ * BUSCAR POR ID
+ */
+export function useBasket(id: string) {
   return useQuery({
     queryKey: ["basket", id],
-    queryFn: () =>
-      getBasketById(id),
+    queryFn: () => getBasketById(id),
     enabled: !!id,
   });
 }
 
+/**
+ * CRIAR
+ */
 export function useCreateBasket() {
-  const queryClient =
-    useQueryClient();
+  const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: createBasket,
+    mutationFn: (data: CreateBasketDTO) => createBasket(data),
 
     onSuccess: () => {
       queryClient.invalidateQueries({
@@ -45,16 +52,20 @@ export function useCreateBasket() {
   });
 }
 
+/**
+ * ATUALIZAR
+ */
 export function useUpdateBasket() {
-  const queryClient =
-    useQueryClient();
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: ({
       id,
       basket,
-    }: any) =>
-      updateBasket(id, basket),
+    }: {
+      id: string;
+      basket: Partial<CreateBasketDTO>;
+    }) => updateBasket(id, basket),
 
     onSuccess: () => {
       queryClient.invalidateQueries({
@@ -64,9 +75,11 @@ export function useUpdateBasket() {
   });
 }
 
+/**
+ * DELETAR
+ */
 export function useDeleteBasket() {
-  const queryClient =
-    useQueryClient();
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: deleteBasket,
