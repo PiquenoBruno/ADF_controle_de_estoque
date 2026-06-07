@@ -1,55 +1,71 @@
 {
   "expo": {
-    "name": "cesta_manager_v3",
+    "name": "Cesta ADF",
     "slug": "cesta_manager_v3",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
-    "scheme": "cestamanagerv3",
-    "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
 
+    "icon": "./assets/images/appImage.jpeg",
+    "scheme": "cestamanagerv3",
+
+    "userInterfaceStyle": "light",   
+
+    "newArchEnabled": true,
+    
     "androidNavigationBar": {
-      "backgroundColor": "#000000",
-      "barStyle": "light-content"
+      "backgroundColor": "#ffffff",
+      "barStyle": "dark-content"
     },
 
     "ios": {
       "supportsTablet": true
     },
-    
+
     "android": {
-      "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
-      },
+      "package": "com.bruno_pi.cesta_manager_v3",
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/appImage.jpeg",
+        "backgroundColor": "#120000"
+      },
+
+      "splash": {
+        "image": "./assets/images/appImage.jpeg",
+        "backgroundColor": "#120000",
+        "resizeMode": "cover"
+      }
     },
+
     "web": {
       "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/appImage.jpeg"
     },
+
     "plugins": [
       "expo-router",
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/logoWhite.jpeg",
-          "imageWidth": 200,
+          "image": "./assets/images/appImage.jpeg",
+          "imageWidth": 180,
           "resizeMode": "contain",
-          "backgroundColor": "#120000",
-          "dark": {
-            "backgroundColor": "#120000"
-          }
+          "backgroundColor": "#120000"
         }
       ]
     ],
+
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "f9d88b48-9b3a-4243-9d9d-80f53355b32b"
+      }
     }
   }
 }
