@@ -1,3 +1,4 @@
+import { router } from "expo-router";
 import { useState } from "react";
 import {
   Alert,
@@ -7,8 +8,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-
-import { router } from "expo-router";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useCreateUser } from "../../src/hooks/useUsers";
 import { colors } from "../../src/style/style";
 
@@ -58,44 +58,46 @@ export default function CreateUser() {
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Novo Usuário</Text>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#FFF" }}>
+      <View style={styles.container}>
+        <Text style={styles.title}>Novo Usuário</Text>
 
-      <View style={styles.card}>
-        <TextInput
-          style={styles.input}
-          placeholder="Nome"
-          value={nome}
-          onChangeText={setNome}
-        />
+        <View style={styles.card}>
+          <TextInput
+            style={styles.input}
+            placeholder="Nome"
+            value={nome}
+            onChangeText={setNome}
+          />
 
-        <TextInput
-          style={styles.input}
-          placeholder="Email"
-          value={email}
-          onChangeText={setEmail}
-          autoCapitalize="none"
-        />
+          <TextInput
+            style={styles.input}
+            placeholder="Email"
+            value={email}
+            onChangeText={setEmail}
+            autoCapitalize="none"
+          />
 
-        <TextInput
-          style={styles.input}
-          placeholder="Senha"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-        />
+          <TextInput
+            style={styles.input}
+            placeholder="Senha"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+          />
+        </View>
+
+        <TouchableOpacity
+          style={styles.button}
+          onPress={handleSave}
+          disabled={isPending}
+        >
+          <Text style={styles.buttonText}>
+            {isPending ? "Criando..." : "Criar Usuário"}
+          </Text>
+        </TouchableOpacity>
       </View>
-
-      <TouchableOpacity
-        style={styles.button}
-        onPress={handleSave}
-        disabled={isPending}
-      >
-        <Text style={styles.buttonText}>
-          {isPending ? "Criando..." : "Criar Usuário"}
-        </Text>
-      </TouchableOpacity>
-    </View>
+    </SafeAreaView>
   );
 }
 

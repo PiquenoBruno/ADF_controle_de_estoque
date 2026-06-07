@@ -1,7 +1,5 @@
 import { router } from "expo-router";
 import { useState } from "react";
-import { useDeleteUser, useUsers } from "../../../src/hooks/useUsers";
-
 import {
   ActivityIndicator,
   Alert,
@@ -13,6 +11,8 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useDeleteUser, useUsers } from "../../../src/hooks/useUsers";
 
 import { colors } from "../../../src/style/style";
 
@@ -83,149 +83,151 @@ export default function UsersList() {
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>
-        Usuários
-      </Text>
-
-      {/* BUSCA */}
-      
-      <TextInput
-        style={styles.searchInput}
-        placeholder="Buscar usuário..."
-        value={search}
-        onChangeText={setSearch}
-      />
-
-      {/* BOTÃO NOVO */}
-
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() =>
-          router.push("/users/createUsers")
-        }
-      >
-        <Text style={styles.buttonText}>
-          + Novo Usuário
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#FFF" }}>
+      <View style={styles.container}>
+        <Text style={styles.title}>
+          Usuários
         </Text>
-      </TouchableOpacity>
 
-      {/* LISTA VAZIA */}
+        {/* BUSCA */}
+        
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Buscar usuário..."
+          value={search}
+          onChangeText={setSearch}
+        />
 
-      {filteredUsers.length === 0 ? (
-        <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>
-            Nenhum usuário encontrado.
+        {/* BOTÃO NOVO */}
+
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() =>
+            router.push("/users/createUsers")
+          }
+        >
+          <Text style={styles.buttonText}>
+            + Novo Usuário
           </Text>
-        </View>
-      ) : (
-        <FlatList
-          data={filteredUsers}
-          keyExtractor={(item) => item.id}
-          showsVerticalScrollIndicator={false}
-          renderItem={({ item }) => (
-            <View style={styles.card}>
-              <Text style={styles.name}>
-                {item.nome}
+        </TouchableOpacity>
+
+        {/* LISTA VAZIA */}
+
+        {filteredUsers.length === 0 ? (
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyText}>
+              Nenhum usuário encontrado.
+            </Text>
+          </View>
+        ) : (
+          <FlatList
+            data={filteredUsers}
+            keyExtractor={(item) => item.id}
+            showsVerticalScrollIndicator={false}
+            renderItem={({ item }) => (
+              <View style={styles.card}>
+                <Text style={styles.name}>
+                  {item.nome}
+                </Text>
+
+                <Text style={styles.email}>
+                  {item.email}
+                </Text>
+
+                <View style={styles.actions}>
+                  <TouchableOpacity
+                    onPress={() =>
+                      router.push({
+                        pathname:
+                          "/users/editUsers",
+                        params: {
+                          id: item.id,
+                        },
+                      })
+                    }
+                  >
+                    <Text style={styles.editText}>
+                      Editar
+                    </Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    disabled={isPending}
+                    onPress={() =>
+                      handleDelete(
+                        item.id,
+                        item.nome
+                      )
+                    }
+                  >
+                    <Text
+                      style={[
+                        styles.deleteText,
+                        {
+                          opacity: isPending
+                            ? 0.5
+                            : 1,
+                        },
+                      ]}
+                    >
+                      {isPending
+                        ? "Excluindo..."
+                        : "Excluir"}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            )}
+          />
+        )}
+
+        {/* MODAL */}
+
+        <Modal
+          visible={modalVisible}
+          transparent
+          animationType="fade"
+        >
+          <View style={styles.overlay}>
+            <View style={styles.modal}>
+              <Text style={styles.modalTitle}>
+                Digite EXCLUIR para confirmar
               </Text>
 
-              <Text style={styles.email}>
-                {item.email}
-              </Text>
+              <TextInput
+                value={confirmText}
+                onChangeText={setConfirmText}
+                placeholder="EXCLUIR"
+                autoCapitalize="characters"
+                style={styles.input}
+              />
 
-              <View style={styles.actions}>
+              <View style={styles.modalActions}>
                 <TouchableOpacity
-                  onPress={() =>
-                    router.push({
-                      pathname:
-                        "/users/editUsers",
-                      params: {
-                        id: item.id,
-                      },
-                    })
-                  }
+                  onPress={() => {
+                    setModalVisible(false);
+                    setSelectedUser(null);
+                    setConfirmText("");
+                  }}
                 >
-                  <Text style={styles.editText}>
-                    Editar
+                  <Text style={styles.cancelText}>
+                    Cancelar
                   </Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                  disabled={isPending}
-                  onPress={() =>
-                    handleDelete(
-                      item.id,
-                      item.nome
-                    )
-                  }
+                  onPress={confirmDelete}
                 >
-                  <Text
-                    style={[
-                      styles.deleteText,
-                      {
-                        opacity: isPending
-                          ? 0.5
-                          : 1,
-                      },
-                    ]}
-                  >
-                    {isPending
-                      ? "Excluindo..."
-                      : "Excluir"}
+                  <Text style={styles.deleteText}>
+                    Excluir
                   </Text>
                 </TouchableOpacity>
               </View>
             </View>
-          )}
-        />
-      )}
-
-      {/* MODAL */}
-
-      <Modal
-        visible={modalVisible}
-        transparent
-        animationType="fade"
-      >
-        <View style={styles.overlay}>
-          <View style={styles.modal}>
-            <Text style={styles.modalTitle}>
-              Digite EXCLUIR para confirmar
-            </Text>
-
-            <TextInput
-              value={confirmText}
-              onChangeText={setConfirmText}
-              placeholder="EXCLUIR"
-              autoCapitalize="characters"
-              style={styles.input}
-            />
-
-            <View style={styles.modalActions}>
-              <TouchableOpacity
-                onPress={() => {
-                  setModalVisible(false);
-                  setSelectedUser(null);
-                  setConfirmText("");
-                }}
-              >
-                <Text style={styles.cancelText}>
-                  Cancelar
-                </Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                onPress={confirmDelete}
-              >
-                <Text style={styles.deleteText}>
-                  Excluir
-                </Text>
-              </TouchableOpacity>
-            </View>
           </View>
-        </View>
-      </Modal>
-    </View>
+        </Modal>
+      </View>
+    </SafeAreaView>
   );
 }
 

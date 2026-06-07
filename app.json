@@ -8,9 +8,16 @@
     "scheme": "cestamanagerv3",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+
+    "androidNavigationBar": {
+      "backgroundColor": "#000000",
+      "barStyle": "light-content"
+    },
+
     "ios": {
       "supportsTablet": true
     },
+    
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
@@ -30,12 +37,12 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splash-icon.png",
+          "image": "./assets/images/logoWhite.jpeg",
           "imageWidth": 200,
           "resizeMode": "contain",
-          "backgroundColor": "#ffffff",
+          "backgroundColor": "#120000",
           "dark": {
-            "backgroundColor": "#000000"
+            "backgroundColor": "#120000"
           }
         }
       ]

@@ -63,11 +63,6 @@ export default function EditProduct() {
       return;
     }
 
-    if (min > qtd) {
-      Alert.alert("Erro", "Mínimo não pode ser maior que estoque.");
-      return;
-    }
-
     try {
       await updateProduct.mutateAsync({
         id,

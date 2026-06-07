@@ -12,70 +12,54 @@ export async function getDashboardData() {
     supabase.from("baskets").select("*"),
     supabase
       .from("deliveries")
-      .select("*")
-      .order("delivered_at", {
-        ascending: false,
-      }),
+      .select(`
+        id,
+        basket_name,
+        status,
+        delivered_at,
+        families:family_id (
+          responsavel
+        )
+      `)
+      .order("delivered_at", { ascending: false }),
   ]);
 
-  const products =
-    productsResult.data ?? [];
+  const products = productsResult.data ?? [];
+  const families = familiesResult.data ?? [];
+  const baskets = basketsResult.data ?? [];
 
-  const families =
-    familiesResult.data ?? [];
+  const deliveries = (deliveriesResult.data ?? []).map((d: any) => ({
+    id: d.id,
+    basket_name: d.basket_name,
+    status: d.status,
+    delivered_at: d.delivered_at,
+    family_name: d.families?.responsavel ?? "Sem família",
+  }));
 
-  const baskets =
-    basketsResult.data ?? [];
+  const lowStock = products.filter(
+    (product: any) =>
+      Number(product.quantidade) <= Number(product.minimo)
+  );
 
-  const deliveries =
-    deliveriesResult.data ?? [];
+  const pendingDeliveries = deliveries.filter(
+    (delivery: any) => delivery.status === "Pendente"
+  );
 
-  const lowStock =
-    products.filter(
-      (product: any) =>
-        Number(product.quantidade) <=
-        Number(product.minimo)
-    );
+  const deliveredCount = deliveries.filter(
+    (delivery: any) => delivery.status === "Entregue"
+  ).length;
 
-  const pendingDeliveries =
-    deliveries.filter(
-      (delivery: any) =>
-        delivery.status ===
-        "Pendente"
-    );
-
-  const deliveredCount =
-    deliveries.filter(
-      (delivery: any) =>
-        delivery.status ===
-        "Entregue"
-    ).length;
-
-  const recentDeliveries =
-    deliveries.slice(0, 5);
+  const recentDeliveries = deliveries.slice(0, 5);
 
   return {
-    totalProducts:
-      products.length,
-
-    totalFamilies:
-      families.length,
-
-    totalBaskets:
-      baskets.length,
-
-    totalDeliveries:
-      deliveries.length,
-
+    totalProducts: products.length,
+    totalFamilies: families.length,
+    totalBaskets: baskets.length,
+    totalDeliveries: deliveries.length,
     deliveredCount,
-
-    pendingDeliveries:
-      pendingDeliveries.length,
-
+    pendingDeliveries: pendingDeliveries.length,
     lowStock,
-
     recentDeliveries,
-
     pendingList: pendingDeliveries,
   };
 }

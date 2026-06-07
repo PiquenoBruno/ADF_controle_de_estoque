@@ -16,7 +16,7 @@ export async function getBasketItems(
       products:product_id (
         id,
         nome,
-        quantidade
+        unidade
       )
     `)
     .eq("basket_id", basket_id);
@@ -52,8 +52,8 @@ export async function createBasketItem(item: {
       .from("basket_items")
       .update({
         quantidade:
-          existing.quantidade +
-          item.quantidade,
+          Number(existing.quantidade) +
+          Number(item.quantidade),
       })
       .eq("id", existing.id)
       .select()

@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-
+import { SafeAreaView } from "react-native-safe-area-context";
 import {
   useUpdateUser,
   useUser,
@@ -68,36 +68,38 @@ export default function EditUser() {
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Editar Usuário</Text>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#FFF" }}>
+      <View style={styles.container}>
+        <Text style={styles.title}>Editar Usuário</Text>
 
-      <View style={styles.card}>
-        <TextInput
-          style={styles.input}
-          value={nome}
-          onChangeText={setNome}
-          placeholder="Nome"
-        />
+        <View style={styles.card}>
+          <TextInput
+            style={styles.input}
+            value={nome}
+            onChangeText={setNome}
+            placeholder="Nome"
+          />
 
-        <TextInput
-          style={styles.input}
-          value={email}
-          onChangeText={setEmail}
-          placeholder="Email"
-          autoCapitalize="none"
-        />
+          <TextInput
+            style={styles.input}
+            value={email}
+            onChangeText={setEmail}
+            placeholder="Email"
+            autoCapitalize="none"
+          />
+        </View>
+
+        <TouchableOpacity
+          style={styles.button}
+          onPress={handleSave}
+          disabled={isPending}
+        >
+          <Text style={styles.buttonText}>
+            {isPending ? "Atualizando..." : "Salvar Alterações"}
+          </Text>
+        </TouchableOpacity>
       </View>
-
-      <TouchableOpacity
-        style={styles.button}
-        onPress={handleSave}
-        disabled={isPending}
-      >
-        <Text style={styles.buttonText}>
-          {isPending ? "Atualizando..." : "Salvar Alterações"}
-        </Text>
-      </TouchableOpacity>
-    </View>
+    </SafeAreaView>
   );
 }
 
