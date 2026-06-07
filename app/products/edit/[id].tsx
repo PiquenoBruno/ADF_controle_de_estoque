@@ -9,11 +9,11 @@ import {
   View,
 } from "react-native";
 
+import { SafeAreaView } from "react-native-safe-area-context";
 import {
   useProduct,
   useUpdateProduct,
 } from "../../../src/hooks/useProducts";
-
 import { colors } from "../../../src/style/style";
 
 export default function EditProduct() {
@@ -87,70 +87,72 @@ export default function EditProduct() {
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Editar Produto</Text>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#FFF" }}>  
+      <View style={styles.container}>
+        <Text style={styles.title}>Editar Produto</Text>
 
-      <View style={styles.card}>
-        <TextInput
-          style={styles.input}
-          value={nome}
-          onChangeText={setNome}
-          placeholder="Nome do produto"
-        />
+        <View style={styles.card}>
+          <TextInput
+            style={styles.input}
+            value={nome}
+            onChangeText={setNome}
+            placeholder="Nome do produto"
+          />
 
-        <TextInput
-          style={styles.input}
-          value={quantidade}
-          onChangeText={setQuantidade}
-          placeholder="Quantidade"
-          keyboardType="numeric"
-        />
+          <TextInput
+            style={styles.input}
+            value={quantidade}
+            onChangeText={setQuantidade}
+            placeholder="Quantidade"
+            keyboardType="numeric"
+          />
 
-        <TextInput
-          style={styles.input}
-          value={minimo}
-          onChangeText={setMinimo}
-          placeholder="Quantidade mínima"
-          keyboardType="numeric"
-        />
+          <TextInput
+            style={styles.input}
+            value={minimo}
+            onChangeText={setMinimo}
+            placeholder="Quantidade mínima"
+            keyboardType="numeric"
+          />
 
-        <Text style={styles.label}>
-          Unidade de medida
-        </Text>
+          <Text style={styles.label}>
+            Unidade de medida
+          </Text>
 
-        <View style={styles.unitContainer}>
-          {unidades.map((item) => (
-            <TouchableOpacity
-              key={item}
-              onPress={() => setUnidade(item)}
-              style={[
-                styles.unitButton,
-                unidade === item && styles.unitButtonActive,
-              ]}
-            >
-              <Text
+          <View style={styles.unitContainer}>
+            {unidades.map((item) => (
+              <TouchableOpacity
+                key={item}
+                onPress={() => setUnidade(item)}
                 style={[
-                  styles.unitText,
-                  unidade === item && styles.unitTextActive,
+                  styles.unitButton,
+                  unidade === item && styles.unitButtonActive,
                 ]}
               >
-                {item}
-              </Text>
-            </TouchableOpacity>
-          ))}
+                <Text
+                  style={[
+                    styles.unitText,
+                    unidade === item && styles.unitTextActive,
+                  ]}
+                >
+                  {item}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
         </View>
-      </View>
 
-      <TouchableOpacity
-        style={styles.button}
-        onPress={handleSave}
-        disabled={updateProduct.isPending}
-      >
-        <Text style={styles.buttonText}>
-          {updateProduct.isPending ? "Atualizando..." : "Salvar Alterações"}
-        </Text>
-      </TouchableOpacity>
-    </View>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={handleSave}
+          disabled={updateProduct.isPending}
+        >
+          <Text style={styles.buttonText}>
+            {updateProduct.isPending ? "Atualizando..." : "Salvar Alterações"}
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </SafeAreaView>
   );
 }
 

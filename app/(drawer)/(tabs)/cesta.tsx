@@ -1,9 +1,12 @@
+import { useState } from "react";
+
 import {
   ActivityIndicator,
   Alert,
   FlatList,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -20,6 +23,8 @@ import { colors } from "../../../src/style/style";
 export default function Cestas() {
   const { data: baskets, isLoading, error } = useBaskets();
   const deleteBasket = useDeleteBasket();
+
+  const [search, setSearch] = useState("");
 
   function handleDelete(id: string) {
     Alert.alert(
@@ -42,6 +47,18 @@ export default function Cestas() {
       ]
     );
   }
+
+  const filteredBaskets = baskets?.filter((item) => {
+    const nomeMatch = item.nome
+      ?.toLowerCase()
+      .includes(search.toLowerCase());
+
+    const descMatch = item.descricao
+      ?.toLowerCase()
+      .includes(search.toLowerCase());
+
+    return nomeMatch || descMatch;
+  });
 
   if (isLoading) {
     return (
@@ -73,8 +90,16 @@ export default function Cestas() {
         </Text>
       </TouchableOpacity>
 
+      {/* SEARCH BAR */}
+      <TextInput
+        placeholder="Buscar cesta..."
+        value={search}
+        onChangeText={setSearch}
+        style={styles.search}
+      />
+
       <FlatList
-        data={baskets}
+        data={filteredBaskets}
         keyExtractor={(item) => item.id}
         showsVerticalScrollIndicator={false}
         renderItem={({ item }) => {
@@ -100,7 +125,8 @@ export default function Cestas() {
                 <TouchableOpacity
                   onPress={() =>
                     router.push({
-                      pathname: "/baskets/details/[id]",
+                      pathname:
+                        "/baskets/details/[id]",
                       params: { id: item.id },
                     })
                   }
@@ -113,7 +139,8 @@ export default function Cestas() {
                 <TouchableOpacity
                   onPress={() =>
                     router.push({
-                      pathname: "/baskets/edit/[id]",
+                      pathname:
+                        "/baskets/edit/[id]",
                       params: { id: item.id },
                     })
                   }
@@ -137,7 +164,7 @@ export default function Cestas() {
         ListEmptyComponent={
           <View style={styles.empty}>
             <Text style={styles.emptyText}>
-              Nenhuma cesta cadastrada
+              Nenhuma cesta encontrada
             </Text>
           </View>
         }
@@ -164,13 +191,22 @@ const styles = StyleSheet.create({
     padding: 14,
     borderRadius: 12,
     alignItems: "center",
-    marginBottom: 16,
+    marginBottom: 12,
   },
 
   buttonText: {
     color: "#FFF",
     fontWeight: "bold",
     fontSize: 16,
+  },
+
+  search: {
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 12,
+    backgroundColor: "#F9FAFB",
   },
 
   card: {

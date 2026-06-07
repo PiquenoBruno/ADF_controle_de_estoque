@@ -13,6 +13,7 @@ import {
   router,
   useLocalSearchParams,
 } from "expo-router";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import {
   useFamily,
@@ -97,61 +98,63 @@ export default function EditFamily() {
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Editar Família</Text>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#FFF" } }>
+      <ScrollView contentContainerStyle={styles.container}>
+        <Text style={styles.title}>Editar Família</Text>
 
-      <View style={styles.card}>
-        <TextInput
-          style={styles.input}
-          placeholder="Responsável"
-          value={responsavel}
-          onChangeText={setResponsavel}
-        />
+        <View style={styles.card}>
+          <TextInput
+            style={styles.input}
+            placeholder="Responsável"
+            value={responsavel}
+            onChangeText={setResponsavel}
+          />
 
-        <TextInput
-          style={styles.input}
-          placeholder="Telefone"
-          keyboardType="phone-pad"
-          value={telefone}
-          onChangeText={setTelefone}
-        />
+          <TextInput
+            style={styles.input}
+            placeholder="Telefone"
+            keyboardType="phone-pad"
+            value={telefone}
+            onChangeText={setTelefone}
+          />
 
-        <TextInput
-          style={styles.input}
-          placeholder="Endereço"
-          value={endereco}
-          onChangeText={setEndereco}
-        />
+          <TextInput
+            style={styles.input}
+            placeholder="Endereço"
+            value={endereco}
+            onChangeText={setEndereco}
+          />
 
-        <TextInput
-          style={styles.input}
-          placeholder="Quantidade de pessoas"
-          keyboardType="numeric"
-          value={quantidadePessoas}
-          onChangeText={setQuantidadePessoas}
-        />
+          <TextInput
+            style={styles.input}
+            placeholder="Quantidade de pessoas"
+            keyboardType="numeric"
+            value={quantidadePessoas}
+            onChangeText={setQuantidadePessoas}
+          />
 
-        <TextInput
-          style={[styles.input, styles.textArea]}
-          placeholder="Observações (opcional)"
-          multiline
-          value={observacoes}
-          onChangeText={setObservacoes}
-        />
-      </View>
+          <TextInput
+            style={[styles.input, styles.textArea]}
+            placeholder="Observações (opcional)"
+            multiline
+            value={observacoes}
+            onChangeText={setObservacoes}
+          />
+        </View>
 
-      <TouchableOpacity
-        style={styles.button}
-        onPress={handleSave}
-        disabled={updateFamily.isPending}
-      >
-        <Text style={styles.buttonText}>
-          {updateFamily.isPending
-            ? "Atualizando..."
-            : "Salvar Alterações"}
-        </Text>
-      </TouchableOpacity>
-    </ScrollView>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={handleSave}
+          disabled={updateFamily.isPending}
+        >
+          <Text style={styles.buttonText}>
+            {updateFamily.isPending
+              ? "Atualizando..."
+              : "Salvar Alterações"}
+          </Text>
+        </TouchableOpacity>
+      </ScrollView>
+    </SafeAreaView>      
   );
 }
 

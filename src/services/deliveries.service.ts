@@ -25,7 +25,13 @@ export async function getDeliveries() {
 export async function getDeliveryById(id: string) {
   const { data, error } = await supabase
     .from("deliveries")
-    .select("*")
+    .select(`
+      *,
+      family:families (
+        id,
+        responsavel
+      )
+    `)
     .eq("id", id)
     .single();
 

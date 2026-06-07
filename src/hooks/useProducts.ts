@@ -10,9 +10,7 @@ import {
 
 import { Product } from "../types/product";
 
-/**
- * LISTAR PRODUTOS
- */
+
 export function useProducts() {
   return useQuery<Product[]>({
     queryKey: ["products"],
@@ -20,9 +18,7 @@ export function useProducts() {
   });
 }
 
-/**
- * BUSCAR POR ID
- */
+
 export function useProduct(id: string) {
   return useQuery<Product>({
     queryKey: ["product", id],
@@ -31,9 +27,7 @@ export function useProduct(id: string) {
   });
 }
 
-/**
- * CRIAR PRODUTO
- */
+
 export function useCreateProduct() {
   const queryClient = useQueryClient();
 
@@ -41,13 +35,12 @@ export function useCreateProduct() {
     mutationFn: createProduct,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] }); 
     },
   });
 }
 
-/**
- * ATUALIZAR PRODUTO
- */
+
 export function useUpdateProduct() {
   const queryClient = useQueryClient();
 
@@ -65,16 +58,19 @@ export function useUpdateProduct() {
       };
     }) => updateProduct(id, product),
 
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
-      queryClient.invalidateQueries({ queryKey: ["product"] });
+
+      queryClient.invalidateQueries({
+        queryKey: ["product", variables.id],
+      });
+
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] }); 
     },
   });
 }
 
-/**
- * DELETAR PRODUTO
- */
+
 export function useDeleteProduct() {
   const queryClient = useQueryClient();
 
@@ -82,6 +78,7 @@ export function useDeleteProduct() {
     mutationFn: deleteProduct,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] }); 
     },
   });
 }

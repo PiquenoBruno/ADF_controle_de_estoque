@@ -1,8 +1,11 @@
+import { useState } from "react";
+
 import {
   ActivityIndicator,
   FlatList,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -13,6 +16,11 @@ import { colors } from "../../../src/style/style";
 
 export default function Entregas() {
   const { data: deliveries, isLoading, error } = useDeliveries();
+
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<
+    "all" | "entregue" | "nao_entregue"
+  >("all");
 
   if (isLoading) {
     return (
@@ -45,8 +53,28 @@ export default function Entregas() {
     }
   }
 
+  const filteredDeliveries = deliveries?.filter((item) => {
+    const matchesSearch =
+      item.basket_name
+        ?.toLowerCase()
+        .includes(search.toLowerCase()) ||
+      (item as any).family?.responsavel
+        ?.toLowerCase()
+        .includes(search.toLowerCase());
+
+    const matchesStatus =
+      statusFilter === "all"
+        ? true
+        : statusFilter === "entregue"
+        ? item.status === "Entregue"
+        : item.status !== "Entregue";
+
+    return matchesSearch && matchesStatus;
+  });
+
   return (
     <View style={styles.container}>
+      {/* BOTÃO NOVA ENTREGA */}
       <TouchableOpacity
         style={styles.button}
         onPress={() => router.push("/deliveries/create")}
@@ -56,8 +84,53 @@ export default function Entregas() {
         </Text>
       </TouchableOpacity>
 
+      {/* BARRA DE PESQUISA */}
+      <TextInput
+        placeholder="Buscar entrega..."
+        value={search}
+        onChangeText={setSearch}
+        style={styles.search}
+      />
+
+      {/* FILTRO STATUS */}
+      <View style={styles.filterRow}>
+        <TouchableOpacity
+          onPress={() => setStatusFilter("all")}
+          style={[
+            styles.filterButton,
+            statusFilter === "all" && styles.filterActive,
+          ]}
+        >
+          <Text style={styles.filterText}>Todas</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={() => setStatusFilter("entregue")}
+          style={[
+            styles.filterButton,
+            statusFilter === "entregue" &&
+              styles.filterActive,
+          ]}
+        >
+          <Text style={styles.filterText}>Entregues</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={() => setStatusFilter("nao_entregue")}
+          style={[
+            styles.filterButton,
+            statusFilter === "nao_entregue" &&
+              styles.filterActive,
+          ]}
+        >
+          <Text style={styles.filterText}>
+            Não entregues
+          </Text>
+        </TouchableOpacity>
+      </View>
+
       <FlatList
-        data={deliveries ?? []}
+        data={filteredDeliveries ?? []}
         keyExtractor={(item) => String(item.id)}
         showsVerticalScrollIndicator={false}
         renderItem={({ item }) => {
@@ -68,13 +141,17 @@ export default function Entregas() {
               </Text>
 
               <Text style={styles.info}>
-                Família: (item as any).family?.responsavel ?? "Sem família"
+                Família:{" "}
+                {(item as any).family?.responsavel ??
+                  "Sem família"}
               </Text>
 
               <Text style={styles.info}>
                 Data:{" "}
                 {item.delivered_at
-                  ? new Date(item.delivered_at).toLocaleDateString()
+                  ? new Date(
+                      item.delivered_at
+                    ).toLocaleDateString()
                   : "Sem data"}
               </Text>
 
@@ -86,7 +163,8 @@ export default function Entregas() {
                 <TouchableOpacity
                   onPress={() =>
                     router.push({
-                      pathname: "/deliveries/details/[id]",
+                      pathname:
+                        "/deliveries/details/[id]",
                       params: { id: item.id },
                     })
                   }
@@ -102,7 +180,7 @@ export default function Entregas() {
         ListEmptyComponent={
           <View style={styles.empty}>
             <Text style={styles.emptyText}>
-              Nenhuma entrega cadastrada
+              Nenhuma entrega encontrada
             </Text>
           </View>
         }
@@ -129,13 +207,48 @@ const styles = StyleSheet.create({
     padding: 14,
     borderRadius: 12,
     alignItems: "center",
-    marginBottom: 16,
+    marginBottom: 12,
   },
 
   buttonText: {
     color: "#FFF",
     fontWeight: "bold",
     fontSize: 16,
+  },
+
+  search: {
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 10,
+    backgroundColor: "#F9FAFB",
+  },
+
+  filterRow: {
+    flexDirection: "row",
+    gap: 8,
+    marginBottom: 12,
+  },
+
+  filterButton: {
+    flex: 1,
+    padding: 10,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+    alignItems: "center",
+  },
+
+  filterActive: {
+    backgroundColor: colors.color1,
+    borderColor: colors.color1,
+  },
+
+  filterText: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#111",
   },
 
   card: {

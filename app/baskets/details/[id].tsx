@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+import { useLocalSearchParams } from "expo-router";
 import {
   Alert,
   FlatList,
@@ -9,13 +10,13 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-
-import { useLocalSearchParams } from "expo-router";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import {
   useBasketItems,
   useCreateBasketItem,
   useDeleteBasketItem,
+  useUpdateBasketItem,
 } from "../../../src/hooks/useBasketItems";
 
 import { useProducts } from "../../../src/hooks/useProducts";
@@ -30,6 +31,7 @@ export default function BasketDetails() {
 
   const createItem = useCreateBasketItem();
   const deleteItem = useDeleteBasketItem();
+  const updateItem = useUpdateBasketItem();
 
   const [productId, setProductId] = useState("");
   const [quantidade, setQuantidade] = useState("");
@@ -79,183 +81,243 @@ export default function BasketDetails() {
     }
   }
 
+  async function aumentarQuantidade(
+    itemId: string,
+    quantidadeAtual: number
+  ) {
+    try {
+      await updateItem.mutateAsync({
+        id: itemId,
+        quantidade: quantidadeAtual + 1,
+      });
+    } catch {
+      Alert.alert("Erro", "Não foi possível atualizar");
+    }
+  }
+
+  async function diminuirQuantidade(
+    itemId: string,
+    quantidadeAtual: number
+  ) {
+    if (quantidadeAtual <= 1) {
+      Alert.alert(
+        "Aviso",
+        "Quantidade mínima é 1"
+      );
+      return;
+    }
+
+    try {
+      await updateItem.mutateAsync({
+        id: itemId,
+        quantidade: quantidadeAtual - 1,
+      });
+    } catch {
+      Alert.alert("Erro", "Não foi possível atualizar");
+    }
+  }
+
   return (
-    <View style={styles.container}>
-      {/* TITLE */}
-      <Text style={styles.title}>Itens da Cesta</Text>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#FFF" }}>
+      <View style={styles.container}>
+        {/* TITLE */}
+        <Text style={styles.title}>Itens da Cesta</Text>
 
-      {/* SELECTOR */}
-      <View style={styles.card}>
-        <TouchableOpacity
-          style={styles.dropdownHeader}
-          onPress={() =>
-            setOpenProducts(!openProducts)
-          }
-        >
-          <Text style={styles.dropdownHeaderText}>
-            {productId
-              ? selectedProduct?.nome
-              : "Selecionar produto"}
+        {/* SELECTOR */}
+        <View style={styles.card}>
+          <TouchableOpacity
+            style={styles.dropdownHeader}
+            onPress={() =>
+              setOpenProducts(!openProducts)
+            }
+          >
+            <Text style={styles.dropdownHeaderText}>
+              {productId
+                ? selectedProduct?.nome
+                : "Selecionar produto"}
+            </Text>
+
+            <Text style={styles.dropdownArrow}>
+              {openProducts ? "▲" : "▼"}
+            </Text>
+          </TouchableOpacity>
+
+          {openProducts && (
+            <View style={styles.dropdownBox}>
+              <TextInput
+                placeholder="Buscar produto..."
+                value={search}
+                onChangeText={setSearch}
+                style={styles.searchInput}
+              />
+
+              <FlatList
+                data={products?.filter((p) =>
+                  p.nome
+                    .toLowerCase()
+                    .includes(search.toLowerCase())
+                )}
+                keyExtractor={(item) => item.id}
+                numColumns={2}
+                columnWrapperStyle={{ gap: 10 }}
+                contentContainerStyle={{ gap: 10 }}
+                renderItem={({ item }) => {
+                  const selected =
+                    productId === item.id;
+
+                  const lowStock =
+                    item.quantidade <= item.minimo;
+
+                  return (
+                    <TouchableOpacity
+                      style={[
+                        styles.productCard,
+                        selected &&
+                          styles.productSelected,
+                      ]}
+                      onPress={() =>
+                        setProductId(item.id)
+                      }
+                    >
+                      <Text
+                        style={[
+                          styles.productName,
+                          selected &&
+                            styles.productNameSelected,
+                        ]}
+                      >
+                        {item.nome}
+                      </Text>
+
+                      <Text
+                        style={[
+                          styles.productStock,
+                          selected &&
+                            styles.productNameSelected,
+                        ]}
+                      >
+                        {item.quantidade} un.
+                      </Text>
+
+                      {lowStock && (
+                        <Text style={styles.warning}>
+                          ⚠ baixo estoque
+                        </Text>
+                      )}
+                    </TouchableOpacity>
+                  );
+                }}
+              />
+            </View>
+          )}
+
+          <Text style={styles.info}>
+            Selecionado:{" "}
+            {selectedProduct?.nome || "Nenhum"}
           </Text>
 
-          <Text style={styles.dropdownArrow}>
-            {openProducts ? "▲" : "▼"}
-          </Text>
-        </TouchableOpacity>
+          <TextInput
+            placeholder="Quantidade"
+            keyboardType="numeric"
+            value={quantidade}
+            onChangeText={setQuantidade}
+            style={styles.input}
+          />
 
-        {/* DROPDOWN */}
-        {openProducts && (
-          <View style={styles.dropdownBox}>
-            <TextInput
-              placeholder="Buscar produto..."
-              value={search}
-              onChangeText={setSearch}
-              style={styles.searchInput}
-            />
+          <TouchableOpacity
+            style={styles.addButton}
+            onPress={handleAdd}
+          >
+            <Text style={styles.addButtonText}>
+              + Adicionar Produto
+            </Text>
+          </TouchableOpacity>
+        </View>
 
-            <FlatList
-              data={products?.filter((p) =>
-                p.nome
-                  .toLowerCase()
-                  .includes(search.toLowerCase())
-              )}
-              keyExtractor={(item) => item.id}
-              numColumns={2}
-              columnWrapperStyle={{
-                gap: 10,
-              }}
-              contentContainerStyle={{ gap: 10 }}
-              renderItem={({ item }) => {
-                const selected =
-                  productId === item.id;
+        {/* ITEMS LIST */}
+        <FlatList
+          data={items}
+          keyExtractor={(item) => item.id}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{
+            paddingBottom: 40,
+          }}
+          renderItem={({ item }) => {
+            const lowStock =
+              item.quantidade <= 1;
 
-                const lowStock =
-                  item.quantidade <= item.minimo;
+            return (
+              <View style={styles.card}>
+                <Text style={styles.name}>
+                  {(item as any).products?.nome}
+                </Text>
 
-                return (
+                {/* QUANTIDADE COM + E − */}
+                <View style={styles.quantityRow}>
                   <TouchableOpacity
-                    style={[
-                      styles.productCard,
-                      selected &&
-                        styles.productSelected,
-                    ]}
+                    style={styles.minusButton}
                     onPress={() =>
-                      setProductId(item.id)
+                      diminuirQuantidade(
+                        item.id,
+                        item.quantidade
+                      )
                     }
                   >
-                    <Text
-                      style={[
-                        styles.productName,
-                        selected &&
-                          styles.productNameSelected,
-                      ]}
-                    >
-                      {item.nome}
+                    <Text style={styles.minusText}>
+                      −
                     </Text>
-
-                    <Text
-                      style={[
-                        styles.productStock,
-                        selected &&
-                          styles.productNameSelected,
-                      ]}
-                    >
-                      {item.quantidade} un.
-                    </Text>
-
-                    {lowStock && (
-                      <Text style={styles.warning}>
-                        ⚠ baixo estoque
-                      </Text>
-                    )}
                   </TouchableOpacity>
-                );
-              }}
-            />
-          </View>
-        )}
 
-        <Text style={styles.info}>
-          Selecionado:{" "}
-          {selectedProduct?.nome || "Nenhum"}
-        </Text>
+                  <Text style={styles.quantityText}>
+                    {item.quantidade}
+                  </Text>
 
-        <TextInput
-          placeholder="Quantidade"
-          keyboardType="numeric"
-          value={quantidade}
-          onChangeText={setQuantidade}
-          style={styles.input}
-        />
+                  <TouchableOpacity
+                    style={styles.plusButton}
+                    onPress={() =>
+                      aumentarQuantidade(
+                        item.id,
+                        item.quantidade
+                      )
+                    }
+                  >
+                    <Text style={styles.plusText}>
+                      +
+                    </Text>
+                  </TouchableOpacity>
+                </View>
 
-        <TouchableOpacity
-          style={styles.addButton}
-          onPress={handleAdd}
-        >
-          <Text style={styles.addButtonText}>
-            + Adicionar Produto
-          </Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* ITEMS LIST */}
-      <FlatList
-        data={items}
-        keyExtractor={(item) => item.id}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{
-          paddingBottom: 40,
-        }}
-        renderItem={({ item }) => {
-          const lowStock =
-            item.quantidade <= 1;
-
-          return (
-            <View style={styles.card}>
-              <Text style={styles.name}>
-                {(item as any).products?.nome}
+                <TouchableOpacity
+                  onPress={() =>
+                    handleDelete(item.id)
+                  }
+                >
+                  <Text style={styles.delete}>
+                    Remover
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            );
+          }}
+          ListEmptyComponent={
+            <View style={styles.empty}>
+              <Text style={styles.emptyText}>
+                Nenhum item na cesta
               </Text>
-
-              <Text style={styles.info}>
-                Quantidade: {item.quantidade}
-              </Text>
-
-              {lowStock && (
-                <Text style={styles.warning}>
-                  ⚠ Quantidade baixa
-                </Text>
-              )}
-
-              <TouchableOpacity
-                onPress={() =>
-                  handleDelete(item.id)
-                }
-              >
-                <Text style={styles.delete}>
-                  Remover
-                </Text>
-              </TouchableOpacity>
             </View>
-          );
-        }}
-        ListEmptyComponent={
-          <View style={styles.empty}>
-            <Text style={styles.emptyText}>
-              Nenhum item na cesta
-            </Text>
-          </View>
-        }
-      />
-    </View>
+          }
+        />
+      </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 20, // SAFE TOP
+    paddingTop: 20,
     paddingHorizontal: 16,
-    paddingBottom: 30, // SAFE BOTTOM
+    paddingBottom: 30,
     backgroundColor: "#FFF",
   },
 
@@ -266,15 +328,22 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
 
+  // ===== CARD PRINCIPAL (form + lista container) =====
   card: {
     backgroundColor: "#FFF",
     padding: 16,
-    borderRadius: 12,
+    borderRadius: 14,
     borderWidth: 1,
     borderColor: "#E5E7EB",
     marginBottom: 12,
+
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
   },
 
+  // ===== DROPDOWN =====
   dropdownHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -293,6 +362,7 @@ const styles = StyleSheet.create({
 
   dropdownArrow: {
     fontSize: 16,
+    color: colors.color8,
   },
 
   dropdownBox: {
@@ -313,6 +383,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#E5E7EB",
     borderRadius: 12,
+    backgroundColor: "#FFF",
   },
 
   productSelected: {
@@ -361,22 +432,78 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
 
+  // ===== ITEM DA LISTA (MELHORADO) =====
   name: {
-    fontSize: 18,
-    fontWeight: "bold",
+    fontSize: 16,
+    fontWeight: "700",
+    color: colors.colorAlivio,
+    marginBottom: 6,
+  },
+
+  quantityRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-start",
+    gap: 14,
+    marginTop: 12,
+    paddingVertical: 6,
+  },
+
+  quantityText: {
+    fontSize: 16,
+    fontWeight: "700",
+    minWidth: 30,
+    textAlign: "center",
     color: colors.colorAlivio,
   },
 
+  plusButton: {
+    width: 34,
+    height: 34,
+    borderRadius: 10,
+    backgroundColor: colors.color1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  minusButton: {
+    width: 34,
+    height: 34,
+    borderRadius: 10,
+    backgroundColor: colors.color1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  plusText: {
+    color: "#FFF",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+
+  minusText: {
+    color: "#FFF",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+
   warning: {
-    marginTop: 6,
+    marginTop: 8,
     color: colors.colorDe,
-    fontWeight: "bold",
+    fontWeight: "600",
+    fontSize: 12,
+    backgroundColor: "#FFF7E6",
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderRadius: 6,
+    alignSelf: "flex-start",
   },
 
   delete: {
     color: colors.colorAle,
-    fontWeight: "bold",
-    marginTop: 10,
+    fontWeight: "600",
+    marginTop: 12,
+    fontSize: 13,
   },
 
   empty: {

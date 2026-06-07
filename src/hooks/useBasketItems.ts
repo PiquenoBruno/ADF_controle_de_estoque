@@ -1,13 +1,14 @@
 import {
-    useMutation,
-    useQuery,
-    useQueryClient,
+  useMutation,
+  useQuery,
+  useQueryClient,
 } from "@tanstack/react-query";
 
 import {
-    createBasketItem,
-    deleteBasketItem,
-    getBasketItems,
+  createBasketItem,
+  deleteBasketItem,
+  getBasketItems,
+  updateBasketItem,
 } from "../services/basketItems.service";
 
 export function useBasketItems(
@@ -35,7 +36,38 @@ export function useCreateBasketItem() {
       createBasketItem,
 
     onSuccess: () => {
-      queryClient.invalidateQueries();
+      queryClient.invalidateQueries({
+        queryKey: [
+          "basket-items",
+        ],
+      });
+    },
+  });
+}
+
+export function useUpdateBasketItem() {
+  const queryClient =
+    useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      id,
+      quantidade,
+    }: {
+      id: string;
+      quantidade: number;
+    }) =>
+      updateBasketItem(
+        id,
+        quantidade
+      ),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: [
+          "basket-items",
+        ],
+      });
     },
   });
 }
@@ -49,7 +81,11 @@ export function useDeleteBasketItem() {
       deleteBasketItem,
 
     onSuccess: () => {
-      queryClient.invalidateQueries();
+      queryClient.invalidateQueries({
+        queryKey: [
+          "basket-items",
+        ],
+      });
     },
   });
 }

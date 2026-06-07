@@ -1,9 +1,12 @@
+import { useState } from "react";
+
 import {
   ActivityIndicator,
   Alert,
   FlatList,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -20,6 +23,9 @@ import { colors } from "../../../src/style/style";
 export default function Familias() {
   const { data: families, isLoading, error } = useFamilies();
   const deleteFamily = useDeleteFamily();
+
+  const [search, setSearch] = useState("");
+  const [expandedId, setExpandedId] = useState<string | null>(null); // controla expandir observações
 
   function handleDelete(id: string) {
     Alert.alert(
@@ -42,6 +48,26 @@ export default function Familias() {
       ]
     );
   }
+
+  // 📱 Função para formatar telefone
+  function formatPhone(value: string) {
+    const cleaned = value.replace(/\D/g, "");
+
+    if (cleaned.length <= 2) return cleaned;
+
+    if (cleaned.length <= 6) {
+      return `(${cleaned.slice(0, 2)}) ${cleaned.slice(2)}`;
+    }
+
+    return `(${cleaned.slice(0, 2)}) ${cleaned.slice(
+      2,
+      7
+    )}-${cleaned.slice(7, 11)}`;
+  }
+
+  const filteredFamilies = families?.filter((item) =>
+    item.responsavel.toLowerCase().includes(search.toLowerCase())
+  );
 
   if (isLoading) {
     return (
@@ -72,9 +98,17 @@ export default function Familias() {
           + Nova Família
         </Text>
       </TouchableOpacity>
-
+      
+      {/* BARRA DE PESQUISA */}
+      <TextInput
+        placeholder="Buscar família..."
+        value={search}
+        onChangeText={setSearch}
+        style={styles.search}
+      />
+      
       <FlatList
-        data={families}
+        data={filteredFamilies}
         keyExtractor={(item) => item.id}
         showsVerticalScrollIndicator={false}
         renderItem={({ item }) => {
@@ -87,7 +121,7 @@ export default function Familias() {
               </Text>
 
               <Text style={styles.info}>
-                📞 {item.telefone}
+                📞 {formatPhone(item.telefone)}
               </Text>
 
               <Text style={styles.info}>
@@ -97,6 +131,34 @@ export default function Familias() {
               <Text style={styles.info}>
                 📍 {item.endereco}
               </Text>
+
+              {/* OBSERVAÇÕES: sempre completas se curtas, ver mais/ver menos se longas */}
+              {item.observacoes ? (
+                <View>
+                  <Text
+                    style={styles.observacoes}
+                    numberOfLines={
+                      item.observacoes.length > 80 && expandedId !== item.id
+                        ? 3
+                        : undefined
+                    }
+                  >
+                    📝 {item.observacoes}
+                  </Text>
+
+                  {item.observacoes.length > 80 && (
+                    <TouchableOpacity
+                      onPress={() =>
+                        setExpandedId(expandedId === item.id ? null : item.id)
+                      }
+                    >
+                      <Text style={styles.verMais}>
+                        {expandedId === item.id ? "Ver menos" : "Ver mais"}
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
+              ) : null}
 
               {familiaGrande && (
                 <Text style={styles.warning}>
@@ -128,7 +190,7 @@ export default function Familias() {
         ListEmptyComponent={
           <View style={styles.empty}>
             <Text style={styles.emptyText}>
-              Nenhuma família cadastrada
+              Nenhuma família encontrada
             </Text>
           </View>
         }
@@ -148,6 +210,15 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+  },
+
+  search: {
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 12,
+    backgroundColor: "#F9FAFB",
   },
 
   button: {
@@ -183,6 +254,18 @@ const styles = StyleSheet.create({
   info: {
     color: colors.color8,
     marginTop: 4,
+  },
+
+  observacoes: {
+    color: colors.color8,
+    marginTop: 6,
+    fontStyle: "italic",
+  },
+
+  verMais: {
+    color: colors.color1,
+    marginTop: 4,
+    fontWeight: "600",
   },
 
   warning: {

@@ -75,5 +75,7 @@ export async function getDashboardData() {
     lowStock,
 
     recentDeliveries,
+
+    pendingList: pendingDeliveries,
   };
 }

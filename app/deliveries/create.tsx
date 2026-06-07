@@ -1,19 +1,23 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import {
   Alert,
-  Button,
   ScrollView,
+  StyleSheet,
   Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 import { router } from "expo-router";
-
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useBaskets } from "../../src/hooks/useBaskets";
 import { useCreateDelivery } from "../../src/hooks/useDeliveries";
 import { useFamilies } from "../../src/hooks/useFamilies";
 
 import { getBasketItems } from "../../src/services/basketItems.service";
+import { colors } from "../../src/style/style";
 
 export default function CreateDelivery() {
   const createDelivery = useCreateDelivery();
@@ -23,36 +27,38 @@ export default function CreateDelivery() {
 
   const [familyId, setFamilyId] = useState("");
   const [basketId, setBasketId] = useState("");
+  const [search, setSearch] = useState("");
+
+  const filteredFamilies = useMemo(() => {
+    if (!families) return [];
+
+    return families.filter((f) =>
+      f.responsavel.toLowerCase().includes(search.toLowerCase())
+    );
+  }, [search, families]);
 
   async function handleSave() {
-    const basket = baskets?.find(
-      (b) => b.id === basketId
-    );
+    const basket = baskets?.find((b) => b.id === basketId);
 
     if (!basket) {
-      Alert.alert("Selecione uma cesta");
+      Alert.alert("Erro", "Selecione uma cesta");
       return;
     }
 
     if (!familyId) {
-      Alert.alert("Selecione uma família");
+      Alert.alert("Erro", "Selecione uma família");
       return;
     }
 
     try {
-      // 🔥 pega itens reais da cesta
-      const basketItems = await getBasketItems(
-        basket.id
-      );
+      const basketItems = await getBasketItems(basket.id);
 
-      // 🔥 monta items da entrega
       const items = basketItems.map((item: any) => ({
         product_id: item.product_id,
         produto: item.products?.nome,
         quantidade: item.quantidade,
       }));
 
-      // 🔥 cria entrega com itens corretos
       await createDelivery.mutateAsync({
         family_id: familyId,
         basket_id: basket.id,
@@ -71,33 +77,156 @@ export default function CreateDelivery() {
   }
 
   return (
-    <ScrollView contentContainerStyle={{ padding: 20 }}>
-      <Text>Selecione a Família</Text>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#FFF" }}>
+      <ScrollView style={styles.container}>
+        <Text style={styles.title}>Nova Entrega</Text>
 
-      {families?.map((family) => (
-        <Button
-          key={family.id}
-          title={family.responsavel}
-          onPress={() => setFamilyId(family.id)}
-        />
-      ))}
+        <View style={styles.card}>
+          {/* 🔎 BUSCA */}
+          <TextInput
+            style={styles.search}
+            placeholder="Buscar família..."
+            value={search}
+            onChangeText={setSearch}
+          />
 
-      <Text style={{ marginTop: 20 }}>
-        Selecione a Cesta
-      </Text>
+          <Text style={styles.label}>Famílias</Text>
 
-      {baskets?.map((basket) => (
-        <Button
-          key={basket.id}
-          title={basket.nome}
-          onPress={() => setBasketId(basket.id)}
-        />
-      ))}
+          <View style={styles.list}>
+            {filteredFamilies?.map((family) => (
+              <TouchableOpacity
+                key={family.id}
+                onPress={() => setFamilyId(family.id)}
+                style={[
+                  styles.itemButton,
+                  familyId === family.id && styles.itemButtonActive,
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.itemText,
+                    familyId === family.id && styles.itemTextActive,
+                  ]}
+                >
+                  {family.responsavel}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
 
-      <Button
-        title="Registrar Entrega"
-        onPress={handleSave}
-      />
-    </ScrollView>
+          <Text style={[styles.label, { marginTop: 16 }]}>
+            Cestas
+          </Text>
+
+          <View style={styles.list}>
+            {baskets?.map((basket) => (
+              <TouchableOpacity
+                key={basket.id}
+                onPress={() => setBasketId(basket.id)}
+                style={[
+                  styles.itemButton,
+                  basketId === basket.id && styles.itemButtonActive,
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.itemText,
+                    basketId === basket.id && styles.itemTextActive,
+                  ]}
+                >
+                  {basket.nome}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+
+        <TouchableOpacity style={styles.button} onPress={handleSave}>
+          <Text style={styles.buttonText}>
+            Registrar Entrega
+          </Text>
+        </TouchableOpacity>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#FFF",
+    padding: 16,
+  },
+
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: colors.colorAlivio,
+    marginBottom: 16,
+  },
+
+  card: {
+    backgroundColor: "#FFF",
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+    marginBottom: 20,
+  },
+
+  search: {
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 12,
+  },
+
+  label: {
+    marginBottom: 8,
+    color: colors.colorAlivio,
+    fontWeight: "600",
+  },
+
+  list: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 10,
+  },
+
+  itemButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+    borderRadius: 12,
+  },
+
+  itemButtonActive: {
+    backgroundColor: colors.color1,
+    borderColor: colors.color1,
+  },
+
+  itemText: {
+    color: colors.colorAlivio,
+    fontWeight: "500",
+  },
+
+  itemTextActive: {
+    color: "#FFF",
+    fontWeight: "bold",
+  },
+
+  button: {
+    backgroundColor: colors.color1,
+    padding: 14,
+    borderRadius: 12,
+    alignItems: "center",
+  },
+
+  buttonText: {
+    color: "#FFF",
+    fontWeight: "bold",
+    fontSize: 16,
+  },
+});

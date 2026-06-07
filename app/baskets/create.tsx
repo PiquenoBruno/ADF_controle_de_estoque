@@ -10,7 +10,7 @@ import {
 } from "react-native";
 
 import { router } from "expo-router";
-
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useCreateBasket } from "../../src/hooks/useBaskets";
 import { colors } from "../../src/style/style";
 
@@ -42,36 +42,38 @@ export default function CreateBasket() {
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Nova Cesta</Text>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#FFF" }}>
+      <ScrollView contentContainerStyle={styles.container}>
+        <Text style={styles.title}>Nova Cesta</Text>
 
-      <View style={styles.card}>
-        <TextInput
-          placeholder="Nome da cesta"
-          value={nome}
-          onChangeText={setNome}
-          style={styles.input}
-        />
+        <View style={styles.card}>
+          <TextInput
+            placeholder="Nome da cesta"
+            value={nome}
+            onChangeText={setNome}
+            style={styles.input}
+          />
 
-        <TextInput
-          placeholder="Descrição (opcional)"
-          value={descricao}
-          onChangeText={setDescricao}
-          multiline
-          style={[styles.input, styles.textArea]}
-        />
-      </View>
+          <TextInput
+            placeholder="Descrição (opcional)"
+            value={descricao}
+            onChangeText={setDescricao}
+            multiline
+            style={[styles.input, styles.textArea]}
+          />
+        </View>
 
-      <TouchableOpacity
-        style={styles.button}
-        onPress={handleSave}
-        disabled={createBasket.isPending}
-      >
-        <Text style={styles.buttonText}>
-          {createBasket.isPending ? "Salvando..." : "Salvar Cesta"}
-        </Text>
-      </TouchableOpacity>
-    </ScrollView>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={handleSave}
+          disabled={createBasket.isPending}
+        >
+          <Text style={styles.buttonText}>
+            {createBasket.isPending ? "Salvando..." : "Salvar Cesta"}
+          </Text>
+        </TouchableOpacity>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 

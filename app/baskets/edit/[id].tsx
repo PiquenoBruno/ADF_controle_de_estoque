@@ -10,7 +10,7 @@ import {
 } from "react-native";
 
 import { router, useLocalSearchParams } from "expo-router";
-
+import { SafeAreaView } from "react-native-safe-area-context";
 import {
   useBasket,
   useUpdateBasket,
@@ -59,36 +59,38 @@ export default function EditBasket() {
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Editar Cesta</Text>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#FFF" }}>
+      <ScrollView contentContainerStyle={styles.container}>
+        <Text style={styles.title}>Editar Cesta</Text>
 
-      <View style={styles.card}>
-        <TextInput
-          placeholder="Nome da cesta"
-          value={nome}
-          onChangeText={setNome}
-          style={styles.input}
-        />
+        <View style={styles.card}>
+          <TextInput
+            placeholder="Nome da cesta"
+            value={nome}
+            onChangeText={setNome}
+            style={styles.input}
+          />
 
-        <TextInput
-          placeholder="Descrição"
-          value={descricao}
-          onChangeText={setDescricao}
-          multiline
-          style={[styles.input, styles.textArea]}
-        />
-      </View>
+          <TextInput
+            placeholder="Descrição"
+            value={descricao}
+            onChangeText={setDescricao}
+            multiline
+            style={[styles.input, styles.textArea]}
+          />
+        </View>
 
-      <TouchableOpacity
-        style={styles.button}
-        onPress={handleSave}
-        disabled={updateBasket.isPending}
-      >
-        <Text style={styles.buttonText}>
-          {updateBasket.isPending ? "Salvando..." : "Salvar Alterações"}
-        </Text>
-      </TouchableOpacity>
-    </ScrollView>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={handleSave}
+          disabled={updateBasket.isPending}
+        >
+          <Text style={styles.buttonText}>
+            {updateBasket.isPending ? "Salvando..." : "Salvar Alterações"}
+          </Text>
+        </TouchableOpacity>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 

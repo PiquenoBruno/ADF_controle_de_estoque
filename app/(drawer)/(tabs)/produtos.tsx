@@ -1,9 +1,12 @@
+import { useState } from "react";
+
 import {
   ActivityIndicator,
   Alert,
   FlatList,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -20,6 +23,11 @@ import { colors } from "../../../src/style/style";
 export default function Produtos() {
   const { data: products, isLoading, error } = useProducts();
   const deleteProduct = useDeleteProduct();
+
+  const [search, setSearch] = useState("");
+  const [stockFilter, setStockFilter] = useState<
+    "all" | "low" | "ok"
+  >("all");
 
   function handleDelete(id: string) {
     Alert.alert(
@@ -42,6 +50,24 @@ export default function Produtos() {
       ]
     );
   }
+
+  const filteredProducts = products?.filter((item) => {
+    const estoqueBaixo =
+      item.quantidade <= item.minimo;
+
+    const matchesSearch = item.nome
+      ?.toLowerCase()
+      .includes(search.toLowerCase());
+
+    const matchesStock =
+      stockFilter === "all"
+        ? true
+        : stockFilter === "low"
+        ? estoqueBaixo
+        : !estoqueBaixo;
+
+    return matchesSearch && matchesStock;
+  });
 
   if (isLoading) {
     return (
@@ -73,13 +99,61 @@ export default function Produtos() {
         </Text>
       </TouchableOpacity>
 
-      {/* LISTA */}
+      {/* SEARCH */}
+      <TextInput
+        placeholder="Buscar produto..."
+        value={search}
+        onChangeText={setSearch}
+        style={styles.search}
+      />
+
+      {/* FILTRO ESTOQUE */}
+      <View style={styles.filterRow}>
+        <TouchableOpacity
+          onPress={() => setStockFilter("all")}
+          style={[
+            styles.filterButton,
+            stockFilter === "all" &&
+              styles.filterActive,
+          ]}
+        >
+          <Text style={styles.filterText}>Todos</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={() => setStockFilter("ok")}
+          style={[
+            styles.filterButton,
+            stockFilter === "ok" &&
+              styles.filterActive,
+          ]}
+        >
+          <Text style={styles.filterText}>
+            Estoque OK
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={() => setStockFilter("low")}
+          style={[
+            styles.filterButton,
+            stockFilter === "low" &&
+              styles.filterActive,
+          ]}
+        >
+          <Text style={styles.filterText}>
+            Estoque baixo
+          </Text>
+        </TouchableOpacity>
+      </View>
+
       <FlatList
-        data={products}
+        data={filteredProducts}
         keyExtractor={(item) => item.id}
         showsVerticalScrollIndicator={false}
         renderItem={({ item }) => {
-          const estoqueBaixo = item.quantidade <= item.minimo;
+          const estoqueBaixo =
+            item.quantidade <= item.minimo;
 
           return (
             <View style={styles.card}>
@@ -92,7 +166,7 @@ export default function Produtos() {
               </Text>
 
               <Text style={styles.info}>
-                Unidade: {item.unidade}
+                Medida: {item.unidade}
               </Text>
 
               <Text style={styles.info}>
@@ -105,12 +179,12 @@ export default function Produtos() {
                 </Text>
               )}
 
-              {/* AÇÕES */}
               <View style={styles.actions}>
                 <TouchableOpacity
                   onPress={() =>
                     router.push({
-                      pathname: "/products/edit/[id]",
+                      pathname:
+                        "/products/edit/[id]",
                       params: { id: item.id },
                     })
                   }
@@ -121,7 +195,9 @@ export default function Produtos() {
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                  onPress={() => handleDelete(item.id)}
+                  onPress={() =>
+                    handleDelete(item.id)
+                  }
                 >
                   <Text style={styles.delete}>
                     Excluir
@@ -134,7 +210,7 @@ export default function Produtos() {
         ListEmptyComponent={
           <View style={styles.empty}>
             <Text style={styles.emptyText}>
-              Nenhum produto cadastrado
+              Nenhum produto encontrado
             </Text>
           </View>
         }
@@ -161,7 +237,7 @@ const styles = StyleSheet.create({
     padding: 14,
     borderRadius: 12,
     alignItems: "center",
-    marginBottom: 16,
+    marginBottom: 12,
   },
 
   buttonText: {
@@ -170,16 +246,48 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
 
+  search: {
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 12,
+    backgroundColor: "#F9FAFB",
+  },
+
+  filterRow: {
+    flexDirection: "row",
+    gap: 8,
+    marginBottom: 12,
+  },
+
+  filterButton: {
+    flex: 1,
+    padding: 10,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+    alignItems: "center",
+  },
+
+  filterActive: {
+    backgroundColor: colors.color1,
+    borderColor: colors.color1,
+  },
+
+  filterText: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#111",
+  },
+
   card: {
     backgroundColor: "#FFF",
     padding: 16,
     borderRadius: 12,
-
     borderWidth: 1,
     borderColor: "#E5E7EB",
-
     marginBottom: 12,
-
     elevation: 3,
   },
 

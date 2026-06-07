@@ -3,7 +3,9 @@ import { supabase } from "./supabase";
 /**
  * LISTAR ITENS DA CESTA
  */
-export async function getBasketItems(basket_id: string) {
+export async function getBasketItems(
+  basket_id: string
+) {
   const { data, error } = await supabase
     .from("basket_items")
     .select(`
@@ -20,6 +22,7 @@ export async function getBasketItems(basket_id: string) {
     .eq("basket_id", basket_id);
 
   if (error) throw error;
+
   return data;
 }
 
@@ -31,7 +34,10 @@ export async function createBasketItem(item: {
   product_id: string;
   quantidade: number;
 }) {
-  const { data: existing, error: findError } = await supabase
+  const {
+    data: existing,
+    error: findError,
+  } = await supabase
     .from("basket_items")
     .select("*")
     .eq("basket_id", item.basket_id)
@@ -40,22 +46,25 @@ export async function createBasketItem(item: {
 
   if (findError) throw findError;
 
-  // 🔥 SE JÁ EXISTE → SOMA
+  // Se já existe, soma quantidade
   if (existing) {
     const { data, error } = await supabase
       .from("basket_items")
       .update({
-        quantidade: existing.quantidade + item.quantidade,
+        quantidade:
+          existing.quantidade +
+          item.quantidade,
       })
       .eq("id", existing.id)
       .select()
       .single();
 
     if (error) throw error;
+
     return data;
   }
 
-  // ➕ SE NÃO EXISTE → CRIA
+  // Se não existe, cria
   const { data, error } = await supabase
     .from("basket_items")
     .insert(item)
@@ -63,13 +72,37 @@ export async function createBasketItem(item: {
     .single();
 
   if (error) throw error;
+
+  return data;
+}
+
+/**
+ * ATUALIZAR QUANTIDADE
+ */
+export async function updateBasketItem(
+  id: string,
+  quantidade: number
+) {
+  const { data, error } = await supabase
+    .from("basket_items")
+    .update({
+      quantidade,
+    })
+    .eq("id", id)
+    .select()
+    .single();
+
+  if (error) throw error;
+
   return data;
 }
 
 /**
  * REMOVER ITEM
  */
-export async function deleteBasketItem(id: string) {
+export async function deleteBasketItem(
+  id: string
+) {
   const { error } = await supabase
     .from("basket_items")
     .delete()

@@ -18,10 +18,10 @@ import {
   decreaseStock,
   increaseStock,
 } from "../../../src/services/stock.service";
+
+import { SafeAreaView } from "react-native-safe-area-context";
 import { supabase } from "../../../src/services/supabase";
-
 import { colors } from "../../../src/style/style";
-
 export default function DeliveryDetails() {
   const { id } = useLocalSearchParams<{ id: string }>();
 
@@ -67,26 +67,15 @@ export default function DeliveryDetails() {
 
   async function handleConfirm() {
     try {
-      if (!isPending()) {
-        Alert.alert("Aviso", "Essa entrega não pode ser confirmada");
-        return;
-      }
+      if (!isPending()) return;
 
-      if (!d.items?.length) {
-        Alert.alert("Erro", "Entrega sem itens");
-        return;
-      }
-
-      for (const item of d.items) {
-        if (!item?.product_id) continue;
+      for (const item of d.items || []) {
         await decreaseStock(item.product_id, item.quantidade ?? 0);
       }
 
       await updateDelivery.mutateAsync({
         id: d.id,
-        delivery: {
-          status: "Entregue",
-        },
+        delivery: { status: "Entregue" },
       });
 
       await supabase
@@ -99,143 +88,114 @@ export default function DeliveryDetails() {
 
       Alert.alert("Sucesso", "Entrega confirmada!");
     } catch (err: any) {
-      Alert.alert("Erro", err?.message || "Falha ao confirmar entrega");
+      Alert.alert("Erro", err?.message);
     }
   }
 
   async function handleCancel() {
     try {
-      if (!isPending()) {
-        Alert.alert("Aviso", "Essa entrega não pode ser cancelada");
-        return;
-      }
+      if (!isPending()) return;
 
-      if (!d.items?.length) {
-        Alert.alert("Erro", "Entrega sem itens");
-        return;
-      }
-
-      for (const item of d.items) {
-        if (!item?.product_id) continue;
+      for (const item of d.items || []) {
         await increaseStock(item.product_id, item.quantidade ?? 0);
       }
 
       await updateDelivery.mutateAsync({
         id: d.id,
-        delivery: {
-          status: "Cancelada",
-        },
+        delivery: { status: "Cancelada" },
       });
 
       Alert.alert("Sucesso", "Entrega cancelada!");
     } catch (err: any) {
-      Alert.alert("Erro", err?.message || "Falha ao cancelar entrega");
+      Alert.alert("Erro", err?.message);
     }
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>
-        Detalhes da Entrega
-      </Text>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#FFF" }}>
+      <ScrollView contentContainerStyle={styles.container}>
+        <Text style={styles.title}>Detalhes da Entrega</Text>
 
-      {/* CARD PRINCIPAL */}
-      <View style={styles.card}>
-        <Text style={styles.label}>Cesta</Text>
-        <Text style={styles.text}>
-          {d.basket_name || "N/A"}
-        </Text>
+        <View style={styles.card}>
+          <Text style={styles.label}>Cesta</Text>
+          <Text style={styles.text}>{d.basket_name}</Text>
 
-        <Text style={styles.label}>Família</Text>
-        <Text style={styles.text}>
-          {d.families?.nome || d.family_id || "N/A"}
-        </Text>
+          <Text style={styles.label}>Família</Text>
 
-        <Text style={styles.label}>Observação</Text>
-        <Text style={styles.text}>
-          {d.observacao || "Nenhuma"}
-        </Text>
-
-        <Text style={styles.label}>Data</Text>
-        <Text style={styles.text}>
-          {d.delivered_at
-            ? new Date(d.delivered_at).toLocaleString()
-            : "Sem data"}
-        </Text>
-
-        <Text
-          style={[
-            styles.status,
-            { color: getStatusColor(d.status) },
-          ]}
-        >
-          Status: {d.status}
-        </Text>
-      </View>
-
-      {/* ITENS */}
-      <Text style={styles.subtitle}>Itens</Text>
-
-      {d.items?.length ? (
-        d.items.map((item: any, index: number) => (
-          <View key={index} style={styles.itemCard}>
-            <Text style={styles.text}>
-              Produto: {item.produto || "N/A"}
-            </Text>
-            <Text style={styles.text}>
-              Quantidade: {item.quantidade ?? 0}
-            </Text>
-          </View>
-        ))
-      ) : (
-        <Text style={styles.text}>
-          Nenhum item registrado
-        </Text>
-      )}
-
-      {/* AÇÕES */}
-      <View style={styles.actions}>
-        {isPending() ? (
-          <>
-            <TouchableOpacity
-              style={styles.confirmBtn}
-              onPress={handleConfirm}
-            >
-              <Text style={styles.btnText}>
-                Confirmar Entrega
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.cancelBtn}
-              onPress={handleCancel}
-            >
-              <Text style={styles.btnText}>
-                Cancelar Entrega
-              </Text>
-            </TouchableOpacity>
-          </>
-        ) : (
-          <Text style={styles.finalText}>
-            Entrega já processada
+          {/* 🔥 AGORA FUNCIONA IGUAL A LISTA */}
+          <Text style={styles.text}>
+            {d.family?.responsavel || "Sem família"}
           </Text>
+
+          <Text style={styles.label}>Data</Text>
+          <Text style={styles.text}>
+            {d.delivered_at
+              ? new Date(d.delivered_at).toLocaleString()
+              : "Sem data"}
+          </Text>
+
+          <Text
+            style={[
+              styles.status,
+              { color: getStatusColor(d.status) },
+            ]}
+          >
+            Status: {d.status}
+          </Text>
+        </View>
+
+        <Text style={styles.subtitle}>Itens</Text>
+
+        {d.items?.length ? (
+          d.items.map((item: any, index: number) => (
+            <View key={index} style={styles.itemCard}>
+              <Text style={styles.text}>
+                {item.produto}
+              </Text>
+              <Text style={styles.text}>
+                Quantidade: {item.quantidade}
+              </Text>
+            </View>
+          ))
+        ) : (
+          <Text style={styles.text}>Nenhum item</Text>
         )}
-      </View>
-    </ScrollView>
+
+        <View style={styles.actions}>
+          {isPending() ? (
+            <>
+              <TouchableOpacity
+                style={styles.confirmBtn}
+                onPress={handleConfirm}
+              >
+                <Text style={styles.btnText}>
+                  Confirmar
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.cancelBtn}
+                onPress={handleCancel}
+              >
+                <Text style={styles.btnText}>
+                  Cancelar
+                </Text>
+              </TouchableOpacity>
+            </>
+          ) : (
+            <Text style={styles.finalText}>
+              Entrega já processada
+            </Text>
+          )}
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    padding: 16,
-    backgroundColor: "#FFF",
-  },
-
-  center: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
+  container: { padding: 16, backgroundColor: "#FFF" },
+  center: { flex: 1, justifyContent: "center", alignItems: "center" },
 
   title: {
     fontSize: 22,
@@ -244,19 +204,27 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
 
+  card: {
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+    padding: 14,
+    borderRadius: 12,
+  },
+
+  label: {
+    fontWeight: "700",
+    marginTop: 10,
+    color: colors.colorAlivio,
+  },
+
+  text: { color: colors.color8 },
+
   subtitle: {
     fontSize: 18,
     fontWeight: "bold",
     marginTop: 20,
     marginBottom: 10,
     color: colors.colorAlivio,
-  },
-
-  card: {
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
-    padding: 14,
-    borderRadius: 12,
   },
 
   itemCard: {
@@ -267,25 +235,9 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
 
-  label: {
-    fontWeight: "700",
-    marginTop: 10,
-    color: colors.colorAlivio,
-  },
+  status: { marginTop: 12, fontWeight: "700" },
 
-  text: {
-    color: colors.color8,
-  },
-
-  status: {
-    marginTop: 12,
-    fontWeight: "700",
-  },
-
-  actions: {
-    marginTop: 20,
-    gap: 10,
-  },
+  actions: { marginTop: 20, gap: 10 },
 
   confirmBtn: {
     backgroundColor: colors.color1,
@@ -301,18 +253,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
 
-  btnText: {
-    color: "#FFF",
-    fontWeight: "bold",
-  },
+  btnText: { color: "#FFF", fontWeight: "bold" },
 
-  errorText: {
-    color: colors.colorAle,
-    fontWeight: "600",
-  },
+  finalText: { fontWeight: "600", color: colors.color8 },
 
-  finalText: {
-    fontWeight: "600",
-    color: colors.color8,
-  },
+  errorText: { color: colors.colorAle, fontWeight: "600" },
 });

@@ -9,6 +9,7 @@ import {
 } from "react-native";
 
 import { router } from "expo-router";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useCreateProduct } from "../../src/hooks/useProducts";
 import { colors } from "../../src/style/style";
 
@@ -47,10 +48,6 @@ export default function CreateProduct() {
       return;
     }
 
-    if (min > qtd) {
-      Alert.alert("Erro", "Mínimo não pode ser maior que estoque.");
-      return;
-    }
 
     try {
       await createProduct.mutateAsync({
@@ -68,70 +65,72 @@ export default function CreateProduct() {
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Novo Produto</Text>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#FFF" }}>
+      <View style={styles.container}>
+        <Text style={styles.title}>Novo Produto</Text>
 
-      <View style={styles.card}>
-        <TextInput
-          style={styles.input}
-          placeholder="Nome do produto"
-          value={nome}
-          onChangeText={setNome}
-        />
+        <View style={styles.card}>
+          <TextInput
+            style={styles.input}
+            placeholder="Nome do produto"
+            value={nome}
+            onChangeText={setNome}
+          />
 
-        <TextInput
-          style={styles.input}
-          placeholder="Quantidade"
-          keyboardType="numeric"
-          value={quantidade}
-          onChangeText={setQuantidade}
-        />
+          <TextInput
+            style={styles.input}
+            placeholder="Quantidade"
+            keyboardType="numeric"
+            value={quantidade}
+            onChangeText={setQuantidade}
+          />
 
-        <TextInput
-          style={styles.input}
-          placeholder="Quantidade mínima"
-          keyboardType="numeric"
-          value={minimo}
-          onChangeText={setMinimo}
-        />
+          <TextInput
+            style={styles.input}
+            placeholder="Quantidade mínima"
+            keyboardType="numeric"
+            value={minimo}
+            onChangeText={setMinimo}
+          />
 
-        <Text style={styles.label}>
-          Unidade de medida
-        </Text>
+          <Text style={styles.label}>
+            Unidade de medida
+          </Text>
 
-        <View style={styles.unitContainer}>
-          {unidades.map((item) => (
-            <TouchableOpacity
-              key={item}
-              onPress={() => setUnidade(item)}
-              style={[
-                styles.unitButton,
-                unidade === item && styles.unitButtonActive,
-              ]}
-            >
-              <Text
+          <View style={styles.unitContainer}>
+            {unidades.map((item) => (
+              <TouchableOpacity
+                key={item}
+                onPress={() => setUnidade(item)}
                 style={[
-                  styles.unitText,
-                  unidade === item && styles.unitTextActive,
+                  styles.unitButton,
+                  unidade === item && styles.unitButtonActive,
                 ]}
               >
-                {item}
-              </Text>
-            </TouchableOpacity>
-          ))}
+                <Text
+                  style={[
+                    styles.unitText,
+                    unidade === item && styles.unitTextActive,
+                  ]}
+                >
+                  {item}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
         </View>
-      </View>
 
-      <TouchableOpacity
-        style={styles.button}
-        onPress={handleSave}
-        disabled={createProduct.isPending}
-      >
-        <Text style={styles.buttonText}>
-          {createProduct.isPending ? "Salvando..." : "Salvar Produto"}
-        </Text>
-      </TouchableOpacity>
-    </View>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={handleSave}
+          disabled={createProduct.isPending}
+        >
+          <Text style={styles.buttonText}>
+            {createProduct.isPending ? "Salvando..." : "Salvar Produto"}
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </SafeAreaView>
   );
 }
 

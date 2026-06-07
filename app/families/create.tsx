@@ -10,6 +10,7 @@ import {
 } from "react-native";
 
 import { router } from "expo-router";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useCreateFamily } from "../../src/hooks/useFamilies";
 import { colors } from "../../src/style/style";
 
@@ -17,14 +18,31 @@ export default function CreateFamily() {
   const createFamily = useCreateFamily();
 
   const [responsavel, setResponsavel] = useState("");
-  const [telefone, setTelefone] = useState("");
+  const [telefone, setTelefone] = useState(""); // 👈 cru (só números)
+  const [telefoneFormatado, setTelefoneFormatado] = useState(""); // 👈 visual
   const [endereco, setEndereco] = useState("");
   const [quantidadePessoas, setQuantidadePessoas] = useState("");
   const [observacoes, setObservacoes] = useState("");
 
+  // 📱 FORMATAÇÃO VISUAL
+  function formatPhone(value: string) {
+    const cleaned = value.replace(/\D/g, "");
+
+    if (cleaned.length <= 2) return cleaned;
+
+    if (cleaned.length <= 6) {
+      return `(${cleaned.slice(0, 2)}) ${cleaned.slice(2)}`;
+    }
+
+    return `(${cleaned.slice(0, 2)}) ${cleaned.slice(
+      2,
+      7
+    )}-${cleaned.slice(7, 11)}`;
+  }
+
   async function handleSave() {
     const resp = responsavel.trim();
-    const tel = telefone.trim();
+    const tel = telefone; // 👈 cru, já limitado
     const end = endereco.trim();
     const qtd = Number(quantidadePessoas);
 
@@ -56,7 +74,7 @@ export default function CreateFamily() {
     try {
       await createFamily.mutateAsync({
         responsavel: resp,
-        telefone: tel,
+        telefone: tel, // 👈 cru, correto
         endereco: end,
         quantidade_pessoas: qtd,
         observacoes,
@@ -65,67 +83,76 @@ export default function CreateFamily() {
       Alert.alert("Sucesso", "Família cadastrada!");
       router.back();
     } catch (error: any) {
-      Alert.alert(
-        "Erro",
-        error?.message || "Falha ao cadastrar família"
-      );
+      Alert.alert("Erro", error?.message || "Falha ao cadastrar família");
     }
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Nova Família</Text>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#FFF" }}>
+      <ScrollView contentContainerStyle={styles.container}>
+        <Text style={styles.title}>Nova Família</Text>
 
-      <View style={styles.card}>
-        <TextInput
-          style={styles.input}
-          placeholder="Responsável"
-          value={responsavel}
-          onChangeText={setResponsavel}
-        />
+        <View style={styles.card}>
+          <TextInput
+            style={styles.input}
+            placeholder="Responsável"
+            value={responsavel}
+            onChangeText={setResponsavel}
+          />
 
-        <TextInput
-          style={styles.input}
-          placeholder="Telefone"
-          keyboardType="phone-pad"
-          value={telefone}
-          onChangeText={setTelefone}
-        />
+          {/* 📱 TELEFONE CORRIGIDO */}
+          <TextInput
+            style={styles.input}
+            placeholder="Telefone"
+            keyboardType="phone-pad"
+            value={telefoneFormatado || telefone}
+            onChangeText={(text) => {
+              const onlyNumbers = text.replace(/\D/g, "");
+              const limited = onlyNumbers.slice(0, 11); // 👈 limita a 11 dígitos
+              setTelefone(limited);
+              setTelefoneFormatado(text);
+            }}
+            onBlur={() => {
+              setTelefoneFormatado(formatPhone(telefone)); // aplica máscara só ao sair
+            }}
+            maxLength={15} // limite visual
+          />
 
-        <TextInput
-          style={styles.input}
-          placeholder="Endereço"
-          value={endereco}
-          onChangeText={setEndereco}
-        />
+          <TextInput
+            style={styles.input}
+            placeholder="Endereço"
+            value={endereco}
+            onChangeText={setEndereco}
+          />
 
-        <TextInput
-          style={styles.input}
-          placeholder="Quantidade de pessoas"
-          keyboardType="numeric"
-          value={quantidadePessoas}
-          onChangeText={setQuantidadePessoas}
-        />
+          <TextInput
+            style={styles.input}
+            placeholder="Quantidade de pessoas"
+            keyboardType="numeric"
+            value={quantidadePessoas}
+            onChangeText={setQuantidadePessoas}
+          />
 
-        <TextInput
-          style={[styles.input, styles.textArea]}
-          placeholder="Observações (opcional)"
-          multiline
-          value={observacoes}
-          onChangeText={setObservacoes}
-        />
-      </View>
+          <TextInput
+            style={[styles.input, styles.textArea]}
+            placeholder="Observações (opcional)"
+            multiline
+            value={observacoes}
+            onChangeText={setObservacoes}
+          />
+        </View>
 
-      <TouchableOpacity
-        style={styles.button}
-        onPress={handleSave}
-        disabled={createFamily.isPending}
-      >
-        <Text style={styles.buttonText}>
-          {createFamily.isPending ? "Salvando..." : "Salvar Família"}
-        </Text>
-      </TouchableOpacity>
-    </ScrollView>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={handleSave}
+          disabled={createFamily.isPending}
+        >
+          <Text style={styles.buttonText}>
+            {createFamily.isPending ? "Salvando..." : "Salvar Família"}
+          </Text>
+        </TouchableOpacity>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 

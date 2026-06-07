@@ -84,8 +84,12 @@ export default function UsersList() {
 
   return (
     <View style={styles.container}>
-      {/* BUSCA */}
+      <Text style={styles.title}>
+        Usuários
+      </Text>
 
+      {/* BUSCA */}
+      
       <TextInput
         style={styles.searchInput}
         placeholder="Buscar usuário..."
@@ -230,6 +234,14 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 16,
     backgroundColor: "#FFF",
+  },
+
+  title: {
+  fontSize: 28,
+  fontFamily: "Bebas Neue",
+  color: colors.color7,
+  letterSpacing: 1,
+  marginBottom: 16,
   },
 
   searchInput: {

@@ -15,7 +15,7 @@ import {
 import { CreateBasketDTO } from "../types/basket";
 
 /**
- * LISTAR
+ * LISTAR CESTAS
  */
 export function useBaskets() {
   return useQuery({
@@ -25,7 +25,7 @@ export function useBaskets() {
 }
 
 /**
- * BUSCAR POR ID
+ * BUSCAR CESTA POR ID
  */
 export function useBasket(id: string) {
   return useQuery({
@@ -36,7 +36,7 @@ export function useBasket(id: string) {
 }
 
 /**
- * CRIAR
+ * CRIAR CESTA
  */
 export function useCreateBasket() {
   const queryClient = useQueryClient();
@@ -45,15 +45,14 @@ export function useCreateBasket() {
     mutationFn: (data: CreateBasketDTO) => createBasket(data),
 
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["baskets"],
-      });
+      queryClient.invalidateQueries({ queryKey: ["baskets"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
     },
   });
 }
 
 /**
- * ATUALIZAR
+ * ATUALIZAR CESTA
  */
 export function useUpdateBasket() {
   const queryClient = useQueryClient();
@@ -67,16 +66,20 @@ export function useUpdateBasket() {
       basket: Partial<CreateBasketDTO>;
     }) => updateBasket(id, basket),
 
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["baskets"] });
+
       queryClient.invalidateQueries({
-        queryKey: ["baskets"],
+        queryKey: ["basket", variables.id],
       });
+
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] }); 
     },
   });
 }
 
 /**
- * DELETAR
+ * DELETAR CESTA
  */
 export function useDeleteBasket() {
   const queryClient = useQueryClient();
@@ -85,9 +88,8 @@ export function useDeleteBasket() {
     mutationFn: deleteBasket,
 
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["baskets"],
-      });
+      queryClient.invalidateQueries({ queryKey: ["baskets"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] }); 
     },
   });
 }
